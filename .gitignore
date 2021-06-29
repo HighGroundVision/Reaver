@@ -5,6 +5,7 @@
 ### AzureFunctions ###
 # Azure Functions localsettings file
 local.settings.json
+appsettings.json
 
 ### VisualStudio ###
 ## Ignore Visual Studio temporary files, build results, and
@@ -398,5 +399,6 @@ FodyWeavers.xsd
 
 ### VisualStudio Patch ###
 # Additional files built by Visual Studio
+launchSettings.json
 
 # End of https://www.toptal.com/developers/gitignore/api/azurefunctions,visualstudio
