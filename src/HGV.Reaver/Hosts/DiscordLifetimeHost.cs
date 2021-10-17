@@ -56,17 +56,13 @@ namespace HGV.Reaver.Hosts
             _slash.ContextMenuExecuted += OnContextMenuExecuted;
             _slash.ContextMenuErrored += OnContextMenuErrored;
 
-#if DEBUG
-            // To register them for a single server, recommended for testing; Remove this later...
             _slash.RegisterCommands<AccountCommand>(319171565818478605);
             _slash.RegisterCommands<ProfileCommand>(319171565818478605);
             _slash.RegisterCommands<ProfileContextMenu>(319171565818478605);
-#else
-            // To register them globally, once you're confident that they're ready to be used by everyone
-            _slash.RegisterCommands<AccountCommand>();
-            _slash.RegisterCommands<ProfileCommand>();
-            _slash.RegisterCommands<ProfileContextMenu>();
-#endif
+
+            // _slash.RegisterCommands<AccountCommand>();
+            // _slash.RegisterCommands<ProfileCommand>();
+            // _slash.RegisterCommands<ProfileContextMenu>();
 
             var interactivityConfiguration = new InteractivityConfiguration()
             {
