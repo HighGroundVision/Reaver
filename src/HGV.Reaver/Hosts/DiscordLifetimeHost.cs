@@ -5,18 +5,19 @@ using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
-using HGV.Reaver.Bot.Commands;
+using HGV.Reaver.Commands;
+using HGV.Reaver.Models;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace HGV.Reaver.Bot.Hosts
+namespace HGV.Reaver.Hosts
 {
     internal class DiscordLifetimeHost : BackgroundService
     {
@@ -25,9 +26,9 @@ namespace HGV.Reaver.Bot.Hosts
         private SlashCommandsExtension _slash { get; set; }
         private IServiceProvider _services { get; set; }
 
-        public DiscordLifetimeHost(IConfiguration configuration, IServiceProvider sp)
+        public DiscordLifetimeHost(IOptions<ReaverSettings> settings, IServiceProvider sp)
         {
-            _token = configuration["DiscordToken"].ToString();
+            _token = settings.Value?.DiscordBotToken ?? throw new ConfigurationValueMissingException(nameof(ReaverSettings.DiscordBotToken));
             _services = sp;
         }
 
@@ -57,12 +58,14 @@ namespace HGV.Reaver.Bot.Hosts
 
 #if DEBUG
             // To register them for a single server, recommended for testing; Remove this later...
-            _slash.RegisterCommands<BotCommands>(319171565818478605);
+            _slash.RegisterCommands<AccountCommand>(319171565818478605);
             _slash.RegisterCommands<ProfileCommand>(319171565818478605);
+            _slash.RegisterCommands<ProfileContextMenu>(319171565818478605);
 #else
             // To register them globally, once you're confident that they're ready to be used by everyone
-            //_slash.RegisterCommands<BotCommands>();
-            //_slash.RegisterCommands<ProfileCommand>();
+            _slash.RegisterCommands<AccountCommand>();
+            _slash.RegisterCommands<ProfileCommand>();
+            _slash.RegisterCommands<ProfileContextMenu>();
 #endif
 
             var interactivityConfiguration = new InteractivityConfiguration()
@@ -83,7 +86,7 @@ namespace HGV.Reaver.Bot.Hosts
             await _client.DisconnectAsync();
         }
 
-        
+
         private Task OnReady(DiscordClient sender, ReadyEventArgs e)
         {
             // let's log the fact that this event occured
@@ -92,12 +95,11 @@ namespace HGV.Reaver.Bot.Hosts
             return Task.CompletedTask;
         }
 
-        private async Task OnGuildAvailable(DiscordClient sender, GuildCreateEventArgs e)
+        private Task OnGuildAvailable(DiscordClient sender, GuildCreateEventArgs e)
         {
             // let's log the name of the guild that was just sent to our client
             sender.Logger.LogInformation($"Guild available: {e.Guild.Name}");
 
-            
             // TODO: If needed can update the permissions of slash commands to control who can run them...
             //var commands = await e.Guild.GetApplicationCommandsAsync();
             //var cmd = commands.FirstOrDefault(_ => _.Name == "AD Profile");
@@ -108,8 +110,7 @@ namespace HGV.Reaver.Bot.Hosts
             // permissions.Add(new DiscordApplicationCommandPermission(e.Guild.Owner, true));
             // await e.Guild.EditApplicationCommandPermissionsAsync(cmd, permissions);
 
-
-            // return Task.CompletedTask;
+            return Task.CompletedTask;
         }
 
         private Task OnClientError(DiscordClient sender, ClientErrorEventArgs e)
@@ -124,7 +125,7 @@ namespace HGV.Reaver.Bot.Hosts
         {
             // let's log the name of the command and user
             e.Context.Client.Logger.LogInformation($"{e.Context.User.Username} executed '{e.Context.CommandName}'");
-            
+
             return Task.CompletedTask;
         }
 
@@ -133,6 +134,18 @@ namespace HGV.Reaver.Bot.Hosts
             // let's log the error details
             e.Context.Client.Logger.LogError($"{e.Context.User.Username} tried executing '{e?.Context?.CommandName ?? "<unknown command>"}' but it errored: {e.Exception.GetType()}: {e.Exception.Message ?? "<no message>"}", DateTime.Now);
 
+            if(e.Exception is AccountNotLinkedException)
+            {
+                var emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = "Accounts Not Linked",
+                    Description = $"{emoji} this account dose not have a steam account linked.",
+                    Color = new DiscordColor(0xFF0000) // red
+                };
+
+                await e.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
+            }
             if (e.Exception is SlashExecutionChecksFailedException)
             {
                 var emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
@@ -160,6 +173,18 @@ namespace HGV.Reaver.Bot.Hosts
             // let's log the error details
             e.Context.Client.Logger.LogError($"{e.Context.User.Username} tried executing '{e?.Context?.CommandName ?? "<unknown command>"}' but it errored: {e.Exception.GetType()}: {e.Exception.Message ?? "<no message>"}", DateTime.Now);
 
+            if (e.Exception is AccountNotLinkedException)
+            {
+                var emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = "Accounts Not Linked",
+                    Description = $"{emoji} the selected user dose not have a steam account linked.",
+                    Color = new DiscordColor(0xFF0000) // red
+                };
+
+                await e.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
+            }
             if (e.Exception is ContextMenuExecutionChecksFailedException)
             {
                 var emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
@@ -173,7 +198,5 @@ namespace HGV.Reaver.Bot.Hosts
                 await e.Context.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().AddEmbed(embed));
             }
         }
-
-        
     }
 }

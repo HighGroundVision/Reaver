@@ -1,27 +1,27 @@
-﻿using HGV.Reaver.Bot.Models;
+﻿using HGV.Reaver.Models.Profile;
 using Newtonsoft.Json;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace HGV.Reaver.Bot.Services
+namespace HGV.Reaver.Services
 {
     public interface IProfileService
     {
-        Task<Profile> GetProfile(ulong accountId);
+        Task<Profile> GetProfile(string accountId);
     }
 
     public class ProfileService : IProfileService
     {
-        private readonly HttpClient _httpClient;
+        private readonly HttpClient httpClient;
 
         public ProfileService(HttpClient client)
         {
-            _httpClient = client;
+            this.httpClient = client;
         }
 
-        public async Task<Profile> GetProfile(ulong steamId)
+        public async Task<Profile> GetProfile(string steamId)
         {
-            var json = await _httpClient.GetStringAsync($"https://ad.datdota.com/api/players/{steamId}");
+            var json = await this.httpClient.GetStringAsync($"https://ad.datdota.com/api/players/{steamId}");
             var model = JsonConvert.DeserializeObject<Root>(json);
             return model.Data;
         }

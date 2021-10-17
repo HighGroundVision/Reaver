@@ -1,7 +1,10 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace HGV.Reaver.Bot.Models
+namespace HGV.Reaver.Models.Profile
 {
     public class WinLossData
     {
@@ -53,6 +56,4 @@ namespace HGV.Reaver.Bot.Models
         [JsonProperty("data")]
         public Profile Data { get; set; }
     }
-
-
 }
