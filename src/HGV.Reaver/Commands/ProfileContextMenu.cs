@@ -20,7 +20,7 @@ namespace HGV.Reaver.Commands
             this.profileService = profileService;
         }
 
-        [ContextMenu(ApplicationCommandType.UserContextMenu, "Ability Draft Profile")]
+        [ContextMenu(ApplicationCommandType.UserContextMenu, "AD Profile")]
         public async Task GetProfile(ContextMenuContext ctx)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder() { IsEphemeral = true });

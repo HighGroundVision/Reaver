@@ -55,14 +55,14 @@ namespace HGV.Reaver.Hosts
             _slash.SlashCommandErrored += this.OnSlashCommandErrored;
             _slash.ContextMenuExecuted += OnContextMenuExecuted;
             _slash.ContextMenuErrored += OnContextMenuErrored;
+         
+            _slash.RegisterCommands<AccountCommand>();
+            _slash.RegisterCommands<ProfileCommand>();
+            _slash.RegisterCommands<ProfileContextMenu>();
 
-            _slash.RegisterCommands<AccountCommand>(319171565818478605);
-            _slash.RegisterCommands<ProfileCommand>(319171565818478605);
-            _slash.RegisterCommands<ProfileContextMenu>(319171565818478605);
-
-            // _slash.RegisterCommands<AccountCommand>();
-            // _slash.RegisterCommands<ProfileCommand>();
-            // _slash.RegisterCommands<ProfileContextMenu>();
+            //_slash.RegisterCommands<AccountCommand>(319171565818478605);
+            //_slash.RegisterCommands<ProfileCommand>(319171565818478605);
+            //_slash.RegisterCommands<ProfileContextMenu>(319171565818478605);
 
             var interactivityConfiguration = new InteractivityConfiguration()
             {
