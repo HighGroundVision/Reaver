@@ -55,14 +55,13 @@ namespace HGV.Reaver.Hosts
             _slash.SlashCommandErrored += this.OnSlashCommandErrored;
             _slash.ContextMenuExecuted += OnContextMenuExecuted;
             _slash.ContextMenuErrored += OnContextMenuErrored;
-         
-            _slash.RegisterCommands<AccountCommand>();
-            _slash.RegisterCommands<ProfileCommand>();
-            _slash.RegisterCommands<ProfileContextMenu>();
 
-            //_slash.RegisterCommands<AccountCommand>(319171565818478605);
-            //_slash.RegisterCommands<ProfileCommand>(319171565818478605);
-            //_slash.RegisterCommands<ProfileContextMenu>(319171565818478605);
+            // 
+            _slash.RegisterCommands<AccountCommands>();
+            _slash.RegisterCommands<ProfileCommands>();
+            _slash.RegisterCommands<ImageCommands>();
+            _slash.RegisterCommands<AbilityCommands>();
+            _slash.RegisterCommands<ProfileContextMenu>();
 
             var interactivityConfiguration = new InteractivityConfiguration()
             {
@@ -70,7 +69,6 @@ namespace HGV.Reaver.Hosts
                 Timeout = TimeSpan.FromSeconds(60),
             };
             _client.UseInteractivity(interactivityConfiguration);
-
 
             await _client.ConnectAsync(status: UserStatus.Online);
 
@@ -87,6 +85,8 @@ namespace HGV.Reaver.Hosts
         {
             // let's log the fact that this event occured
             sender.Logger.LogInformation("Client is ready to process events.");
+
+            var cmds = _slash.RegisteredCommands.ToList();
 
             return Task.CompletedTask;
         }
@@ -130,6 +130,19 @@ namespace HGV.Reaver.Hosts
             // let's log the error details
             e.Context.Client.Logger.LogError($"{e.Context.User.Username} tried executing '{e?.Context?.CommandName ?? "<unknown command>"}' but it errored: {e.Exception.GetType()}: {e.Exception.Message ?? "<no message>"}", DateTime.Now);
 
+            if(e.Exception is UserFriendlyException)
+            {
+                var msg = e.Exception.Message;
+                var emoji = DiscordEmoji.FromName(e.Context.Client, ":warning:");
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = "Error",
+                    Description = $"{emoji} {msg}",
+                    Color = new DiscordColor(0xFF0000) // red
+                };
+
+                await e.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
+            }
             if(e.Exception is AccountNotLinkedException)
             {
                 var emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");

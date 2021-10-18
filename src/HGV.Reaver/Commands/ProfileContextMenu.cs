@@ -13,6 +13,7 @@ namespace HGV.Reaver.Commands
         private readonly IProfileService profileService;
 
         private readonly string DEFAULT_IMAGE_URL = "https://steamuserimages-a.akamaihd.net/ugc/868480752636433334/1D2881C5C9B3AD28A1D8852903A8F9E1FF45C2C8/";
+        private readonly string DEFAULT_FOOTER_URL = "https://hyperstone.highgroundvision.com/images/wards/observer.png";
 
         public ProfileContextMenu(IAccountService accountService, IProfileService profileService)
         {
@@ -33,7 +34,7 @@ namespace HGV.Reaver.Commands
                 .WithUrl($"http://steamcommunity.com/profiles/{user.SteamId}/")
                 .WithThumbnail(profile.Avatar ?? DEFAULT_IMAGE_URL)
                 .WithColor(DiscordColor.Purple)
-                .WithFooter("stats provided by ad.datdota.com", "https://hyperstone.highgroundvision.com/images/wards/observer.png");
+                .WithFooter("stats provided by ad.datdota.com", DEFAULT_FOOTER_URL);
 
             builder.AddField("ID", profile.AccountId.ToString(), false);
             builder.AddField("WINRATE", (profile.WinLoss?.Winrate ?? 0).ToString("P"), true);

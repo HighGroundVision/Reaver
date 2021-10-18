@@ -1,3 +1,4 @@
+using HGV.Basilius.Client;
 using HGV.Reaver.Hosts;
 using HGV.Reaver.Models;
 using HGV.Reaver.Services;
@@ -49,8 +50,16 @@ namespace HGV.Reaver
             services.AddControllersWithViews();
 
             services.AddHostedService<DiscordLifetimeHost>();
+
             services.AddHttpClient<IProfileService, ProfileService>();
+            services.AddHttpClient<IMatchServices, MatchServices>();
+            services.AddHttpClient<IAbilityStatsService, AbilityStatsService>();
+
             services.AddSingleton<IAccountService, AccountService>();
+            services.AddSingleton<IDraftImageService, DraftImageService>();
+            services.AddSingleton<IAbilityImageService, AbilityImageService>();
+            services.AddSingleton<IRanksImageService, RanksImageService>();
+            services.AddSingleton<IMetaClient, MetaClient>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

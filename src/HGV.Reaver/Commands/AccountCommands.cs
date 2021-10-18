@@ -9,12 +9,12 @@ using System.Threading.Tasks;
 namespace HGV.Reaver.Commands
 {
     [SlashCommandGroup("Account", "Account Commands")]
-    public class AccountCommand : ApplicationCommandModule
+    public class AccountCommands : ApplicationCommandModule
     {
         private readonly string baseUrl;
         private readonly IAccountService accountService;
 
-        public AccountCommand(IAccountService accountService, IOptions<ReaverSettings> settings)
+        public AccountCommands(IAccountService accountService, IOptions<ReaverSettings> settings)
         {
             this.accountService = accountService;
             this.baseUrl = settings.Value?.BaseURL ?? throw new ConfigurationValueMissingException(nameof(ReaverSettings.BaseURL));
@@ -35,7 +35,7 @@ namespace HGV.Reaver.Commands
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(builder.Build()));
         }
 
-        [SlashCommand("Delink", "Tells the bot to forget you", false)]
+        [SlashCommand("Delink", "Tells the bot to forget you")]
         public async Task Delink(InteractionContext ctx)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder() { IsEphemeral = true });

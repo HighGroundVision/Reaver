@@ -9,10 +9,15 @@
     <PackageReference Include="AspNet.Security.OAuth.Discord" Version="5.0.16" />
     <PackageReference Include="AspNet.Security.OpenId.Steam" Version="5.0.0" />
     <PackageReference Include="Azure.Data.Tables" Version="12.2.1" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.10.0" />
     <PackageReference Include="DSharpPlus" Version="4.2.0-nightly-01030" />
     <PackageReference Include="DSharpPlus.Interactivity" Version="4.2.0-nightly-01030" />
     <PackageReference Include="DSharpPlus.SlashCommands" Version="4.2.0-nightly-01030" />
+    <PackageReference Include="HGV.Basilius" Version="7.30.2" />
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="8.3.3" />
+    <PackageReference Include="Magick.NET.Core" Version="8.3.3" />
     <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.2.0" />
+    <PackageReference Include="Polly" Version="7.2.2" />
     <PackageReference Include="PuppeteerSharp" Version="5.1.0" />
   </ItemGroup>
 

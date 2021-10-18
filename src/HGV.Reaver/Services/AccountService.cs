@@ -15,17 +15,20 @@ namespace HGV.Reaver.Services
 
     public class AccountService : IAccountService
     {
-        private const string TABLE_NAME = "hgvReaverUsers";
+        private const string TABLE_NAME = "reaver";
         private readonly string connectionString;
 
         public AccountService(IOptions<ReaverSettings> settings)
         {
             this.connectionString = settings.Value?.StorageConnectionString ?? throw new ConfigurationValueMissingException(nameof(ReaverSettings.StorageConnectionString));
+
+            var client = new TableClient(this.connectionString, TABLE_NAME);
+            client.CreateIfNotExists();
         }
 
         public async Task AddLink(UserEntity user)
         {
-            var client = await GetTableClient();
+            var client = new TableClient(this.connectionString, TABLE_NAME);
             await client.UpsertEntityAsync(user, TableUpdateMode.Replace);
         }
 
@@ -33,7 +36,7 @@ namespace HGV.Reaver.Services
         {
             try
             {
-                var client = await GetTableClient();
+                var client = new TableClient(this.connectionString, TABLE_NAME);
                 await client.DeleteEntityAsync(GuildId.ToString(), UserId.ToString());
             }
             catch (Exception)
@@ -46,7 +49,7 @@ namespace HGV.Reaver.Services
         {
             try
             {
-                var client = await GetTableClient();
+                var client = new TableClient(this.connectionString, TABLE_NAME);
                 var reponse = await client.GetEntityAsync<UserEntity>(GuildId.ToString(), UserId.ToString());
                 return reponse.Value;
             }
@@ -56,12 +59,5 @@ namespace HGV.Reaver.Services
             }
         }
 
-        private async Task<TableClient> GetTableClient()
-        {
-            var client = new TableServiceClient(this.connectionString);
-            var table = client.GetTableClient(TABLE_NAME);
-            await table.CreateIfNotExistsAsync();
-            return table;
-        }
     }
 }
