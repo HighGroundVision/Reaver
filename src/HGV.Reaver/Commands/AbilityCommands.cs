@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace HGV.Reaver.Commands
 {
-    [SlashCommandGroup("Ability", "Ability Commands")]
+    [SlashCommandGroup("Ability", "Commands for infomation about the ability.")]
     public class AbilityCommands : ApplicationCommandModule
     {
         private readonly string DEFAULT_FOOTER_URL = "https://hyperstone.highgroundvision.com/images/wards/observer.png";

@@ -55,13 +55,11 @@ namespace HGV.Reaver.Hosts
             _slash.ContextMenuExecuted += OnContextMenuExecuted;
             _slash.ContextMenuErrored += OnContextMenuErrored;
 
-            //_slash.RegisterCommands<AccountCommands>(319171565818478605);
-            //_slash.RegisterCommands<ProfileCommands>(319171565818478605);
-            //_slash.RegisterCommands<ImageCommands>(319171565818478605);
-            //_slash.RegisterCommands<AbilityCommands>(319171565818478605);
-            //_slash.RegisterCommands<ProfileContextMenu>(319171565818478605);
-
+            // 319171565818478605
             _slash.RegisterCommands<AdminCommands>();
+            _slash.RegisterCommands<ReactionRoles>();
+            _slash.RegisterCommands<TeamCommands>();
+            _slash.RegisterCommands<LeagueCommands>();
             _slash.RegisterCommands<AccountCommands>();
             _slash.RegisterCommands<ProfileCommands>();
             _slash.RegisterCommands<ImageCommands>();

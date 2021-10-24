@@ -53,15 +53,15 @@ namespace HGV.Reaver.Commands
     }
 
     [SlashRequireOwner]
-    [SlashCommandGroup("Admin", "Admin Commands")]
+    [SlashCommandGroup("Admin", "Admin commands to setup the bot")]
     public class AdminCommands : ApplicationCommandModule
     {
         public AdminCommands()
         {
         }
 
-        [SlashCommand("EnableCommand", "Links a disabled command with a role to enabled it.")]
-        public async Task Setup(InteractionContext ctx,
+        [SlashCommand("Enable Command", "Links a disabled command with a role to enabled it.")]
+        public async Task EnableCommand(InteractionContext ctx,
             [ChoiceProvider(typeof(TestChoiceProvider)), Option("command", "Command to link")] string id,
             [Option("role", "Role to link")] DiscordRole role)
         {
@@ -76,14 +76,6 @@ namespace HGV.Reaver.Commands
             await ctx.Guild.EditApplicationCommandPermissionsAsync(command, permissions);
 
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Done!"));
-        }
-
-        [SlashCommand("AutoRoles", "Links a reaction to self service role")]
-        public async Task ReactionRole(InteractionContext ctx)
-        {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder() { IsEphemeral = true });
-
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Error with AutoRoles"));
         }
     }
 }
