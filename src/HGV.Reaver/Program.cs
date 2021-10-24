@@ -12,7 +12,11 @@ namespace HGV.Reaver
 
         public static IHostBuilder CreateHostBuilder(string[] args)
         {
-            return Host.CreateDefaultBuilder(args).ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>());
+            return Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(b => 
+                {
+                    b.UseStartup<Startup>();
+                });
         }
             
     }

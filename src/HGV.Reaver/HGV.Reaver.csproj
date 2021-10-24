@@ -16,7 +16,6 @@
     <PackageReference Include="HGV.Basilius" Version="7.30.2" />
     <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="8.3.3" />
     <PackageReference Include="Magick.NET.Core" Version="8.3.3" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.2.0" />
     <PackageReference Include="Polly" Version="7.2.2" />
     <PackageReference Include="PuppeteerSharp" Version="5.1.0" />
   </ItemGroup>

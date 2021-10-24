@@ -1,6 +1,7 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
+using HGV.Reaver.Handlers;
 using HGV.Reaver.Models;
 using HGV.Reaver.Services;
 using Microsoft.Extensions.Options;
@@ -13,11 +14,14 @@ namespace HGV.Reaver.Commands
     {
         private readonly string baseUrl;
         private readonly IAccountService accountService;
+        private readonly IChangeNicknameHandler handler;
 
-        public AccountCommands(IAccountService accountService, IOptions<ReaverSettings> settings)
+        public AccountCommands(IOptions<ReaverSettings> settings, IAccountService accountService, IChangeNicknameHandler handler)
         {
-            this.accountService = accountService;
             this.baseUrl = settings.Value?.BaseURL ?? throw new ConfigurationValueMissingException(nameof(ReaverSettings.BaseURL));
+
+            this.accountService = accountService;
+            this.handler = handler;
         }
 
         [SlashCommand("Link", "Links your Discord and Steam accounts")]
@@ -27,20 +31,30 @@ namespace HGV.Reaver.Commands
 
             var builder = new DiscordEmbedBuilder();
             builder.WithColor(DiscordColor.Purple);
-            builder.WithTitle("Link Accounts");
-            builder.WithDescription("A number of the commands require that your accounts are linked.");
+            builder.WithTitle("Click Here to Link Accounts");
+            builder.WithDescription("Click the link above to sign into discord and steam to link the accounts. A number of the commands require linked accounts.");
             builder.WithUrl($"{this.baseUrl}/account/link/{ctx.Guild.Id}");
             builder.WithThumbnail("https://hyperstone.highgroundvision.com/images/hgv/bot-logo.png");
 
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(builder.Build()));
         }
 
-        [SlashCommand("Delink", "Tells the bot to forget you")]
+        [SlashCommand("Delink", "Everyone deserves the right to be forgotten")]
         public async Task Delink(InteractionContext ctx)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder() { IsEphemeral = true });
 
             await this.accountService.RemoveLink(ctx.Guild.Id, ctx.Member.Id);
+
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Done!"));
+        }
+
+        [SlashCommand("Refresh", "Refreshes the linked account")]
+        public async Task Refresh(InteractionContext ctx)
+        {
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder() { IsEphemeral = true });
+
+            await this.handler.ChangeNickname(ctx.Member);
 
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Done!"));
         }

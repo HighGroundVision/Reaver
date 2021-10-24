@@ -1,7 +1,9 @@
 ﻿using Azure.Data.Tables;
+using DSharpPlus;
 using HGV.Reaver.Models;
 using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace HGV.Reaver.Services
@@ -15,33 +17,30 @@ namespace HGV.Reaver.Services
 
     public class AccountService : IAccountService
     {
-        private const string TABLE_NAME = "reaver";
-        private readonly string connectionString;
+        private const string TABLE_NAME = "userLUT";
+        
+        private readonly TableClient tableClient;
 
         public AccountService(IOptions<ReaverSettings> settings)
         {
-            this.connectionString = settings.Value?.StorageConnectionString ?? throw new ConfigurationValueMissingException(nameof(ReaverSettings.StorageConnectionString));
-
-            var client = new TableClient(this.connectionString, TABLE_NAME);
-            client.CreateIfNotExists();
+            var connectionString = settings.Value?.StorageConnectionString ?? throw new ConfigurationValueMissingException(nameof(ReaverSettings.StorageConnectionString));
+            this.tableClient = new TableClient(connectionString, TABLE_NAME);
+            this.tableClient.CreateIfNotExists();
         }
 
         public async Task AddLink(UserEntity user)
         {
-            var client = new TableClient(this.connectionString, TABLE_NAME);
-            await client.UpsertEntityAsync(user, TableUpdateMode.Replace);
+            await this.tableClient.UpsertEntityAsync(user, TableUpdateMode.Replace);
         }
 
         public async Task RemoveLink(ulong GuildId, ulong UserId)
         {
             try
             {
-                var client = new TableClient(this.connectionString, TABLE_NAME);
-                await client.DeleteEntityAsync(GuildId.ToString(), UserId.ToString());
+                await this.tableClient.DeleteEntityAsync(GuildId.ToString(), UserId.ToString());
             }
             catch (Exception)
             {
-                // TODO: Dose this matter...?
             }
         }
 
@@ -49,8 +48,7 @@ namespace HGV.Reaver.Services
         {
             try
             {
-                var client = new TableClient(this.connectionString, TABLE_NAME);
-                var reponse = await client.GetEntityAsync<UserEntity>(GuildId.ToString(), UserId.ToString());
+                var reponse = await this.tableClient.GetEntityAsync<UserEntity>(GuildId.ToString(), UserId.ToString());
                 return reponse.Value;
             }
             catch (Azure.RequestFailedException)

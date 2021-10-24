@@ -1,4 +1,6 @@
+using DSharpPlus;
 using HGV.Basilius.Client;
+using HGV.Reaver.Handlers;
 using HGV.Reaver.Hosts;
 using HGV.Reaver.Models;
 using HGV.Reaver.Services;
@@ -8,6 +10,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace HGV.Reaver
 {
@@ -55,11 +58,23 @@ namespace HGV.Reaver
             services.AddHttpClient<IMatchServices, MatchServices>();
             services.AddHttpClient<IAbilityStatsService, AbilityStatsService>();
 
+            services.AddSingleton((sp) => 
+            {
+                var config = new DiscordConfiguration
+                {
+                    Token = settings?.DiscordBotToken ?? throw new ConfigurationValueMissingException(nameof(ReaverSettings.DiscordBotToken)),
+                    TokenType = TokenType.Bot,
+                    AutoReconnect = true,
+                    MinimumLogLevel = LogLevel.Debug,
+                };
+                return new DiscordClient(config);
+            });
             services.AddSingleton<IAccountService, AccountService>();
             services.AddSingleton<IDraftImageService, DraftImageService>();
             services.AddSingleton<IAbilityImageService, AbilityImageService>();
             services.AddSingleton<IRanksImageService, RanksImageService>();
             services.AddSingleton<IMetaClient, MetaClient>();
+            services.AddSingleton<IChangeNicknameHandler, ChangeNicknameHandler>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

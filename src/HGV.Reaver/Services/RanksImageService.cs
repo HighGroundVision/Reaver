@@ -5,6 +5,7 @@ using HGV.Reaver.Models;
 using Microsoft.Extensions.Options;
 using PuppeteerSharp;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace HGV.Reaver.Services
@@ -16,7 +17,7 @@ namespace HGV.Reaver.Services
 
     public class RanksImageService : IRanksImageService
     {
-        private const string CONTAINER_NAME = "reaver-ranks";
+        private const string CONTAINER_NAME = "temp";
 
         private readonly string connectionString;
         private readonly ConnectOptions puppeteerConfuration;

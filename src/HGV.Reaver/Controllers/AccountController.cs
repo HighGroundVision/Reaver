@@ -1,9 +1,9 @@
-﻿using Azure.Data.Tables;
+﻿using DSharpPlus;
+using HGV.Reaver.Handlers;
 using HGV.Reaver.Models;
 using HGV.Reaver.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
 using System.Threading.Tasks;
@@ -14,10 +14,12 @@ namespace HGV.Reaver.Controllers
     public class AccountController : Controller
     {
         private readonly IAccountService accountService;
+        private readonly IChangeNicknameHandler handler;
 
-        public AccountController(IAccountService accountService)
+        public AccountController(IAccountService accountService, IChangeNicknameHandler handler)
         {
             this.accountService = accountService;
+            this.handler = handler;
         }
 
         [Authorize(AuthenticationSchemes = "Discord")]
@@ -71,6 +73,8 @@ namespace HGV.Reaver.Controllers
             }
 
             await this.accountService.AddLink(entity);
+
+            await this.handler.ChangeNickname(entity);
 
             return RedirectToAction("Linked");
         }

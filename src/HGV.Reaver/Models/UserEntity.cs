@@ -19,4 +19,14 @@ namespace HGV.Reaver.Models
         public DateTimeOffset? Timestamp { get; set; }
         public ETag ETag { get; set; }
     }
+
+    public class User
+    {
+        public string Email { get; set; }
+        public ulong DiscordGuidId { get; set; }
+        public ulong DiscordUserId { get; set; }
+        public string DiscordNickname { get; set; }
+        public ulong SteamId { get; set; }
+        public string SteamPersona { get; set; }
+    }
 }

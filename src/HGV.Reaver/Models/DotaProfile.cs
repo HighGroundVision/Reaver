@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace HGV.Reaver.Models.Profile
+namespace HGV.Reaver.Models.DotaProfile
 {
     public class WinLossData
     {
@@ -18,7 +18,7 @@ namespace HGV.Reaver.Models.Profile
         public int? Wins { get; set; }
     }
 
-    public class Profile
+    public class DotaProfile
     {
         [JsonProperty("avatar")]
         public string Avatar { get; set; }
@@ -54,6 +54,6 @@ namespace HGV.Reaver.Models.Profile
     public class Root
     {
         [JsonProperty("data")]
-        public Profile Data { get; set; }
+        public DotaProfile Data { get; set; }
     }
 }

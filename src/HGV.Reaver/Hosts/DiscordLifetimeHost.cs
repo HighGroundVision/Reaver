@@ -21,27 +21,26 @@ namespace HGV.Reaver.Hosts
 {
     internal class DiscordLifetimeHost : BackgroundService
     {
-        private readonly string _token;
         private DiscordClient _client;
-        private SlashCommandsExtension _slash { get; set; }
-        private IServiceProvider _services { get; set; }
+        private SlashCommandsExtension _slash;
+        private IServiceProvider _services;
 
-        public DiscordLifetimeHost(IOptions<ReaverSettings> settings, IServiceProvider sp)
+        public DiscordLifetimeHost(IServiceProvider sp, DiscordClient client)
         {
-            _token = settings.Value?.DiscordBotToken ?? throw new ConfigurationValueMissingException(nameof(ReaverSettings.DiscordBotToken));
             _services = sp;
+            _client = client;
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            var clientConfiguration = new DiscordConfiguration
-            {
-                Token = _token,
-                TokenType = TokenType.Bot,
-                AutoReconnect = true,
-                MinimumLogLevel = LogLevel.Debug,
-            };
-            _client = new DiscordClient(clientConfiguration);
+            //var clientConfiguration = new DiscordConfiguration
+            //{
+            //    Token = _token,
+            //    TokenType = TokenType.Bot,
+            //    AutoReconnect = true,
+            //    MinimumLogLevel = LogLevel.Debug,
+            //};
+            //_client = new DiscordClient(clientConfiguration);
             _client.Ready += this.OnReady;
             _client.GuildAvailable += this.OnGuildAvailable;
             _client.ClientErrored += this.OnClientError;
@@ -56,7 +55,13 @@ namespace HGV.Reaver.Hosts
             _slash.ContextMenuExecuted += OnContextMenuExecuted;
             _slash.ContextMenuErrored += OnContextMenuErrored;
 
-            // 
+            //_slash.RegisterCommands<AccountCommands>(319171565818478605);
+            //_slash.RegisterCommands<ProfileCommands>(319171565818478605);
+            //_slash.RegisterCommands<ImageCommands>(319171565818478605);
+            //_slash.RegisterCommands<AbilityCommands>(319171565818478605);
+            //_slash.RegisterCommands<ProfileContextMenu>(319171565818478605);
+
+            _slash.RegisterCommands<AdminCommands>();
             _slash.RegisterCommands<AccountCommands>();
             _slash.RegisterCommands<ProfileCommands>();
             _slash.RegisterCommands<ImageCommands>();
@@ -96,16 +101,6 @@ namespace HGV.Reaver.Hosts
             // let's log the name of the guild that was just sent to our client
             sender.Logger.LogInformation($"Guild available: {e.Guild.Name}");
 
-            // TODO: If needed can update the permissions of slash commands to control who can run them...
-            //var commands = await e.Guild.GetApplicationCommandsAsync();
-            //var cmd = commands.FirstOrDefault(_ => _.Name == "AD Profile");
-            //var permissions = new List<DiscordApplicationCommandPermission>();
-            //await e.Guild.EditApplicationCommandPermissionsAsync(cmd, permissions);
-
-            // var permissions = new List<DiscordApplicationCommandPermission>();
-            // permissions.Add(new DiscordApplicationCommandPermission(e.Guild.Owner, true));
-            // await e.Guild.EditApplicationCommandPermissionsAsync(cmd, permissions);
-
             return Task.CompletedTask;
         }
 
@@ -130,19 +125,6 @@ namespace HGV.Reaver.Hosts
             // let's log the error details
             e.Context.Client.Logger.LogError($"{e.Context.User.Username} tried executing '{e?.Context?.CommandName ?? "<unknown command>"}' but it errored: {e.Exception.GetType()}: {e.Exception.Message ?? "<no message>"}", DateTime.Now);
 
-            if(e.Exception is UserFriendlyException)
-            {
-                var msg = e.Exception.Message;
-                var emoji = DiscordEmoji.FromName(e.Context.Client, ":warning:");
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = "Error",
-                    Description = $"{emoji} {msg}",
-                    Color = new DiscordColor(0xFF0000) // red
-                };
-
-                await e.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
-            }
             if(e.Exception is AccountNotLinkedException)
             {
                 var emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
@@ -155,7 +137,7 @@ namespace HGV.Reaver.Hosts
 
                 await e.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
             }
-            if (e.Exception is SlashExecutionChecksFailedException)
+            else if (e.Exception is SlashExecutionChecksFailedException)
             {
                 var emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
                 var embed = new DiscordEmbedBuilder
@@ -166,6 +148,32 @@ namespace HGV.Reaver.Hosts
                 };
 
                 await e.Context.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().AddEmbed(embed));
+            }
+            else if (e.Exception is UserFriendlyException)
+            {
+                var msg = e.Exception.Message;
+                var emoji = DiscordEmoji.FromName(e.Context.Client, ":warning:");
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = "Error",
+                    Description = $"{emoji} {msg}",
+                    Color = new DiscordColor(0xFF0000) // red
+                };
+
+                await e.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
+            }
+            else
+            {
+                var msg = e.Exception.Message;
+                var emoji = DiscordEmoji.FromName(e.Context.Client, ":warning:");
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = "Error",
+                    Description = $"{emoji} {msg}",
+                    Color = new DiscordColor(0xFF0000) // red
+                };
+
+                await e.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
             }
         }
 
@@ -194,7 +202,7 @@ namespace HGV.Reaver.Hosts
 
                 await e.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
             }
-            if (e.Exception is ContextMenuExecutionChecksFailedException)
+            else if (e.Exception is ContextMenuExecutionChecksFailedException)
             {
                 var emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
                 var embed = new DiscordEmbedBuilder
@@ -205,6 +213,32 @@ namespace HGV.Reaver.Hosts
                 };
 
                 await e.Context.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().AddEmbed(embed));
+            }
+            else if (e.Exception is UserFriendlyException)
+            {
+                var msg = e.Exception.Message;
+                var emoji = DiscordEmoji.FromName(e.Context.Client, ":warning:");
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = "Error",
+                    Description = $"{emoji} {msg}",
+                    Color = new DiscordColor(0xFF0000) // red
+                };
+
+                await e.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
+            }
+            else
+            {
+                var msg = e.Exception.Message;
+                var emoji = DiscordEmoji.FromName(e.Context.Client, ":warning:");
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = "Error",
+                    Description = $"{emoji} {msg}",
+                    Color = new DiscordColor(0xFF0000) // red
+                };
+
+                await e.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
             }
         }
     }
