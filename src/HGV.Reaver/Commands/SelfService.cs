@@ -15,10 +15,10 @@ using System.Threading.Tasks;
 
 namespace HGV.Reaver.Commands
 {
-    [SlashCommandGroup("Reaction Role", "Commmands to build new or add to self service to existing messages", false)]
-    public class ReactionRoles : ApplicationCommandModule
+    [SlashCommandGroup("SelfService", "Commmands to build new or add to self service to existing messages", false)]
+    public class SelfService : ApplicationCommandModule
     {
-        public ReactionRoles()
+        public SelfService()
         {
         }
 

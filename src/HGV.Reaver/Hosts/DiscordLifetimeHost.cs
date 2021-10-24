@@ -57,7 +57,7 @@ namespace HGV.Reaver.Hosts
 
             // 319171565818478605
             _slash.RegisterCommands<AdminCommands>();
-            _slash.RegisterCommands<ReactionRoles>();
+            _slash.RegisterCommands<SelfService>();
             _slash.RegisterCommands<TeamCommands>();
             _slash.RegisterCommands<LeagueCommands>();
             _slash.RegisterCommands<AccountCommands>();

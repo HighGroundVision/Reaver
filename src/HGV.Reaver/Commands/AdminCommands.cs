@@ -60,8 +60,8 @@ namespace HGV.Reaver.Commands
         {
         }
 
-        [SlashCommand("Enable Command", "Links a disabled command with a role to enabled it.")]
-        public async Task EnableCommand(InteractionContext ctx,
+        [SlashCommand("Permissions", "Links a disabled command with a role to enabled it.")]
+        public async Task Permissions(InteractionContext ctx,
             [ChoiceProvider(typeof(TestChoiceProvider)), Option("command", "Command to link")] string id,
             [Option("role", "Role to link")] DiscordRole role)
         {
