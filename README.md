@@ -2,10 +2,6 @@
 
 Discord bot for HGV
 
-Invite Link:
-
-https://discord.com/api/oauth2/authorize?client_id=548296925858889729&permissions=536804326487&redirect_uri=https%3A%2F%2Freaver.azurewebsites.net%2Fsignin-discord&scope=applications.commands%20bot
-
 ## TODO:
 
 Create tables for
