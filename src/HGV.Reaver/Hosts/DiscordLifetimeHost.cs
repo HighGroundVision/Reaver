@@ -89,8 +89,6 @@ namespace HGV.Reaver.Hosts
             // let's log the fact that this event occured
             sender.Logger.LogInformation("Client is ready to process events.");
 
-            var cmds = _slash.RegisteredCommands.ToList();
-
             return Task.CompletedTask;
         }
 
@@ -118,63 +116,6 @@ namespace HGV.Reaver.Hosts
             return Task.CompletedTask;
         }
 
-        private async Task OnSlashCommandErrored(SlashCommandsExtension sender, DSharpPlus.SlashCommands.EventArgs.SlashCommandErrorEventArgs e)
-        {
-            // let's log the error details
-            e.Context.Client.Logger.LogError($"{e.Context.User.Username} tried executing '{e?.Context?.CommandName ?? "<unknown command>"}' but it errored: {e.Exception.GetType()}: {e.Exception.Message ?? "<no message>"}", DateTime.Now);
-
-            if(e.Exception is AccountNotLinkedException)
-            {
-                var emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = "Accounts Not Linked",
-                    Description = $"{emoji} this account dose not have a steam account linked.",
-                    Color = new DiscordColor(0xFF0000) // red
-                };
-
-                await e.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
-            }
-            else if (e.Exception is SlashExecutionChecksFailedException)
-            {
-                var emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = "Access denied",
-                    Description = $"{emoji} You do not have the permissions required to execute this command.",
-                    Color = new DiscordColor(0xFF0000) // red
-                };
-
-                await e.Context.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().AddEmbed(embed));
-            }
-            else if (e.Exception is UserFriendlyException)
-            {
-                var msg = e.Exception.Message;
-                var emoji = DiscordEmoji.FromName(e.Context.Client, ":warning:");
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = "Error",
-                    Description = $"{emoji} {msg}",
-                    Color = new DiscordColor(0xFF0000) // red
-                };
-
-                await e.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
-            }
-            else
-            {
-                var msg = e.Exception.Message;
-                var emoji = DiscordEmoji.FromName(e.Context.Client, ":warning:");
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = "Error",
-                    Description = $"{emoji} {msg}",
-                    Color = new DiscordColor(0xFF0000) // red
-                };
-
-                await e.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
-            }
-        }
-
         private Task OnContextMenuExecuted(SlashCommandsExtension sender, DSharpPlus.SlashCommands.EventArgs.ContextMenuExecutedEventArgs e)
         {
             // let's log the name of the command and user
@@ -183,60 +124,130 @@ namespace HGV.Reaver.Hosts
             return Task.CompletedTask;
         }
 
+        private async Task OnSlashCommandErrored(SlashCommandsExtension sender, DSharpPlus.SlashCommands.EventArgs.SlashCommandErrorEventArgs e)
+        {
+            try
+            {
+                // let's log the error details
+                e.Context.Client.Logger.LogError($"{e.Context.User.Username} tried executing '{e?.Context?.CommandName ?? "<unknown command>"}' but it errored: {e.Exception.GetType()}: {e.Exception.Message ?? "<no message>"}", DateTime.Now);
+
+                if (e.Exception is AccountNotLinkedException)
+                {
+                    var emoji = DiscordEmoji.FromName(e.Context.Client, ":stop_sign:");
+                    var embed = new DiscordEmbedBuilder
+                    {
+                        Title = "Accounts Not Linked",
+                        Description = $"{emoji} You do not have an account linked. Plese run the '/account link' command.",
+                        Color = new DiscordColor(0xFF0000) // red
+                    };
+
+                    await e.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
+                }
+                else if (e.Exception is SlashExecutionChecksFailedException)
+                {
+                    var emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
+                    var embed = new DiscordEmbedBuilder
+                    {
+                        Title = "Access denied",
+                        Description = $"{emoji} You do not have the permissions required to execute this command.",
+                        Color = new DiscordColor(0xFF0000) // red
+                    };
+
+                    await e.Context.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().AddEmbed(embed));
+                }
+                else if (e.Exception is UserFriendlyException)
+                {
+                    var msg = e.Exception.Message;
+                    var emoji = DiscordEmoji.FromName(e.Context.Client, ":warning:");
+                    var embed = new DiscordEmbedBuilder
+                    {
+                        Title = "Error",
+                        Description = $"{emoji} {msg}",
+                        Color = new DiscordColor(0xFF0000) // red
+                    };
+
+                    await e.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
+                }
+                else
+                {
+                    var emoji = DiscordEmoji.FromName(e.Context.Client, ":warning:");
+                    var embed = new DiscordEmbedBuilder
+                    {
+                        Title = "Error",
+                        Description = $"{emoji} Uh-Oh something happened we did not count for. We have logged the error but you probly let a admin know too.",
+                        Color = new DiscordColor(0xFF0000) // red
+                    };
+
+                    await e.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
+                }
+            }
+            catch (Exception ex)
+            {
+                e.Context.Client.Logger.LogError(ex, $"Failed to handle Error for SlashCommand: '{e?.Context?.CommandName ?? "<unknown command>"}'");
+            }
+        }
+
+ 
         private async Task OnContextMenuErrored(SlashCommandsExtension sender, DSharpPlus.SlashCommands.EventArgs.ContextMenuErrorEventArgs e)
         {
-            // let's log the error details
-            e.Context.Client.Logger.LogError($"{e.Context.User.Username} tried executing '{e?.Context?.CommandName ?? "<unknown command>"}' but it errored: {e.Exception.GetType()}: {e.Exception.Message ?? "<no message>"}", DateTime.Now);
-
-            if (e.Exception is AccountNotLinkedException)
+            try
             {
-                var emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = "Accounts Not Linked",
-                    Description = $"{emoji} the selected user dose not have a steam account linked.",
-                    Color = new DiscordColor(0xFF0000) // red
-                };
+                // let's log the error details
+                e.Context.Client.Logger.LogError($"{e.Context.User.Username} tried executing '{e?.Context?.CommandName ?? "<unknown command>"}' but it errored: {e.Exception.GetType()}: {e.Exception.Message ?? "<no message>"}", DateTime.Now);
 
-                await e.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
+                if (e.Exception is AccountNotLinkedException)
+                {
+                    var emoji = DiscordEmoji.FromName(e.Context.Client, ":stop_sign:");
+                    var embed = new DiscordEmbedBuilder
+                    {
+                        Title = "Accounts Not Linked",
+                        Description = $"{emoji} the selected user dose not have a steam account linked.",
+                        Color = new DiscordColor(0xFF0000) // red
+                    };
+
+                    await e.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
+                }
+                else if (e.Exception is ContextMenuExecutionChecksFailedException)
+                {
+                    var emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
+                    var embed = new DiscordEmbedBuilder
+                    {
+                        Title = "Access denied",
+                        Description = $"{emoji} You do not have the permissions required to execute this command.",
+                        Color = new DiscordColor(0xFF0000) // red
+                    };
+
+                    await e.Context.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().AddEmbed(embed));
+                }
+                else if (e.Exception is UserFriendlyException)
+                {
+                    var msg = e.Exception.Message;
+                    var emoji = DiscordEmoji.FromName(e.Context.Client, ":warning:");
+                    var embed = new DiscordEmbedBuilder
+                    {
+                        Title = "Error",
+                        Description = $"{emoji} {msg}",
+                        Color = new DiscordColor(0xFF0000) // red
+                    };
+
+                    await e.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
+                }
+                else
+                {
+                    var emoji = DiscordEmoji.FromName(e.Context.Client, ":warning:");
+                    var embed = new DiscordEmbedBuilder
+                    {
+                        Title = "Error",
+                        Description = $"{emoji} Uh-Oh something happened we did not count for. We have logged the error but you probly let a admin know too.",
+                        Color = new DiscordColor(0xFF0000) // red
+                    };
+
+                    await e.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
+                }
             }
-            else if (e.Exception is ContextMenuExecutionChecksFailedException)
+            catch (Exception ex)
             {
-                var emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = "Access denied",
-                    Description = $"{emoji} You do not have the permissions required to execute this command.",
-                    Color = new DiscordColor(0xFF0000) // red
-                };
-
-                await e.Context.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().AddEmbed(embed));
-            }
-            else if (e.Exception is UserFriendlyException)
-            {
-                var msg = e.Exception.Message;
-                var emoji = DiscordEmoji.FromName(e.Context.Client, ":warning:");
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = "Error",
-                    Description = $"{emoji} {msg}",
-                    Color = new DiscordColor(0xFF0000) // red
-                };
-
-                await e.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
-            }
-            else
-            {
-                var msg = e.Exception.Message;
-                var emoji = DiscordEmoji.FromName(e.Context.Client, ":warning:");
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = "Error",
-                    Description = $"{emoji} {msg}",
-                    Color = new DiscordColor(0xFF0000) // red
-                };
-
-                await e.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
+                e.Context.Client.Logger.LogError(ex, $"Failed to handle Error for SlashCommand: '{e?.Context?.CommandName ?? "<unknown command>"}'");
             }
         }
     }
