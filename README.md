@@ -34,4 +34,5 @@ Create tables for
   / League - Match
   Who: League Admin Role
 
-  / Admin - SelfService
+  / SelfService - Build
+  / SelfService - Add
