@@ -52,13 +52,13 @@ namespace HGV.Reaver.Commands
 
         [SlashCommand("Summary", "A basic summary of the ability.")]
         public async Task Summary(InteractionContext ctx,
-            [ChoiceProvider(typeof(AbilityNameChoiceProvider)), Option("Ability", "select the Ability of one the options")] int id
+            [ChoiceProvider(typeof(AbilityNameChoiceProvider)), Option("Ability", "select the Ability of one the options")] long id
             //[Option("Ability", "The name of the Ability")] string name
         )
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-            var ability = await this.abilityStatsService.GetAbility(id);
+            var ability = await this.abilityStatsService.GetAbility((int)id);
 
             var builder = new DiscordEmbedBuilder()
                 .WithTitle(ability.Name)
@@ -77,13 +77,13 @@ namespace HGV.Reaver.Commands
 
         [SlashCommand("Card", "The Wiki ability card.")]
         public async Task Card(InteractionContext ctx,
-            [ChoiceProvider(typeof(AbilityNameChoiceProvider)), Option("Ability", "select the Ability of one the options")] int id
-            //[Option("Ability", "The name of the Ability")] string name
+            [ChoiceProvider(typeof(AbilityNameChoiceProvider)), Option("Ability", "select the Ability of one the options")] long id
+        //[Option("Ability", "The name of the Ability")] string name
         )
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-            var stream = await this.abilityImageService.GetWikiCard(id);
+            var stream = await this.abilityImageService.GetWikiCard((int)id);
 
             var builder = new DiscordWebhookBuilder();
             builder.AddFile($"{id}.png", stream);
