@@ -15,9 +15,9 @@ using System.Threading.Tasks;
 
 namespace HGV.Reaver.Commands
 {
-    public class TestChoiceProvider : ChoiceProvider
+    public class CommandChoiceProvider : ChoiceProvider
     {
-        public TestChoiceProvider()
+        public CommandChoiceProvider()
         {
         }
 
@@ -62,7 +62,7 @@ namespace HGV.Reaver.Commands
 
         [SlashCommand("Permissions", "Links a disabled command with a role to enabled it.")]
         public async Task Permissions(InteractionContext ctx,
-            [ChoiceProvider(typeof(TestChoiceProvider)), Option("command", "Command to link")] string id,
+            [ChoiceProvider(typeof(CommandChoiceProvider)), Option("command", "Command to link")] string id,
             [Option("role", "Role to link")] DiscordRole role)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder() { IsEphemeral = true });

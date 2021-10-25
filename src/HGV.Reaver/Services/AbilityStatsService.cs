@@ -12,7 +12,6 @@ namespace HGV.Reaver.Services
     public interface IAbilityStatsService
     {
         Task<AbilityStat> GetAbility(int id);
-        Task<AbilityStat> GetAbility(string name);
     }
 
     public class AbilityStatsService : IAbilityStatsService
@@ -58,13 +57,6 @@ namespace HGV.Reaver.Services
         {
             var collection = await this.GetAbilities();
             var data = collection.Find(_ => _.AbilityId == id);
-            return data;
-        }
-
-        public async Task<AbilityStat> GetAbility(string name)
-        {
-            var collection = await this.GetAbilities();
-            var data = collection.Find(_ => _.Name == name);
             return data;
         }
     }

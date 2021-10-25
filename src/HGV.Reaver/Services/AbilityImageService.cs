@@ -15,7 +15,7 @@ namespace HGV.Reaver.Services
 {
     public interface IAbilityImageService
     {
-        Task<Stream> GetWikiCard(string name);
+        Task<Stream> GetWikiCard(int abilityId);
     }
 
     public class AbilityImageService : IAbilityImageService
@@ -31,16 +31,16 @@ namespace HGV.Reaver.Services
             this.metaClient = metaClient;
         }
 
-        public async Task<Stream> GetWikiCard(string abilityName)
+        public async Task<Stream> GetWikiCard(int abilityId)
         {
             var collection = this.metaClient.GetAbilities();
-            var ability = collection.FirstOrDefault(_ => _.Name == abilityName);
+            var ability = collection.FirstOrDefault(_ => _.Id == abilityId);
             if (ability is null)
-                throw new UserFriendlyException($"Unable to find ability {abilityName}");
+                throw new UserFriendlyException($"Unable to find ability with id {abilityId}");
 
             var hero = this.metaClient.GetHero(ability.HeroId);
             if(hero is null)
-                throw new UserFriendlyException($"Unable to find ability {abilityName}");
+                throw new UserFriendlyException($"Unable to find hero with id {ability.HeroId}");
 
             var browser = await Puppeteer.ConnectAsync(this.puppeteerConfuration);
             try
@@ -56,7 +56,7 @@ namespace HGV.Reaver.Services
                 await Task.Delay(TimeSpan.FromSeconds(5));
 
                 var elements = await page.QuerySelectorAllAsync(".ability-background");
-                var element = await GetElement(elements, abilityName);
+                var element = await GetElement(elements, ability.Name);
                 var stream = await element.ScreenshotStreamAsync(new ScreenshotOptions() { Type = ScreenshotType.Png });
                 return stream;
             }
