@@ -11,7 +11,7 @@ namespace HGV.Reaver.Services
 {
     public interface IAbilityStatsService
     {
-        Task<AbilityStat> GetAbility(int id);
+        Task<AbilityStat> GetAbility(string name);
     }
 
     public class AbilityStatsService : IAbilityStatsService
@@ -53,10 +53,15 @@ namespace HGV.Reaver.Services
             return collection;
         }
 
-        public async Task<AbilityStat> GetAbility(int id)
+        public async Task<AbilityStat> GetAbility(string name)
         {
+            var key = name.Trim().ToUpperInvariant();
+
             var collection = await this.GetAbilities();
-            var data = collection.Find(_ => _.AbilityId == id);
+            var data = collection.Find(_ => _.Name.Trim().ToUpperInvariant() == key);
+            if (data is null)
+                throw new UserFriendlyException($"Unable to find ability with name {name}");
+
             return data;
         }
     }

@@ -15,27 +15,6 @@ using System.Threading.Tasks;
 
 namespace HGV.Reaver.Commands
 {
-    public class AbilityNameChoiceProvider : ChoiceProvider
-    {
-        public AbilityNameChoiceProvider()
-        {
-        }
-
-        public override Task<IEnumerable<DiscordApplicationCommandOptionChoice>> Provider()
-        {
-            var client = this.Services.GetService(typeof(IMetaClient)) as IMetaClient;
-            var abilities = client.GetAbilities();
-            var heroes = client.GetHeroes();
-
-            var collection = abilities
-                .Where(_ => _.IsSkill == true || _.IsUltimate == true)
-                .Join(heroes, _ => _.HeroId, _ => _.Id, (lhs, rhs) => new { Name = $"{rhs.Name} {lhs.Name}", Value = lhs.Id })
-                .Select(_ => new DiscordApplicationCommandOptionChoice(_.Name, _.Value));
-
-            return Task.FromResult(collection);
-        }
-    }
-
     [SlashCommandGroup("Ability", "Commands for infomation about the ability.")]
     public class AbilityCommands : ApplicationCommandModule
     {
@@ -52,13 +31,12 @@ namespace HGV.Reaver.Commands
 
         [SlashCommand("Summary", "A basic summary of the ability.")]
         public async Task Summary(InteractionContext ctx,
-            [ChoiceProvider(typeof(AbilityNameChoiceProvider)), Option("Ability", "select the Ability of one the options")] long id
-            //[Option("Ability", "The name of the Ability")] string name
+            [Option("Ability", "The name of the ability")] string name
         )
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-            var ability = await this.abilityStatsService.GetAbility((int)id);
+            var ability = await this.abilityStatsService.GetAbility(name);
 
             var builder = new DiscordEmbedBuilder()
                 .WithTitle(ability.Name)
@@ -77,16 +55,15 @@ namespace HGV.Reaver.Commands
 
         [SlashCommand("Card", "The Wiki ability card.")]
         public async Task Card(InteractionContext ctx,
-            [ChoiceProvider(typeof(AbilityNameChoiceProvider)), Option("Ability", "select the Ability of one the options")] long id
-        //[Option("Ability", "The name of the Ability")] string name
+            [Option("Ability", "The name of the ability")] string name
         )
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-            var stream = await this.abilityImageService.GetWikiCard((int)id);
+            var stream = await this.abilityImageService.GetWikiCard(name);
 
             var builder = new DiscordWebhookBuilder();
-            builder.AddFile($"{id}.png", stream);
+            builder.AddFile($"{name}.png", stream);
 
             await ctx.EditResponseAsync(builder);
         }

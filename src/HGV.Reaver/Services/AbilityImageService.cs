@@ -15,7 +15,7 @@ namespace HGV.Reaver.Services
 {
     public interface IAbilityImageService
     {
-        Task<Stream> GetWikiCard(int abilityId);
+        Task<Stream> GetWikiCard(string name);
     }
 
     public class AbilityImageService : IAbilityImageService
@@ -31,16 +31,18 @@ namespace HGV.Reaver.Services
             this.metaClient = metaClient;
         }
 
-        public async Task<Stream> GetWikiCard(int abilityId)
+        public async Task<Stream> GetWikiCard(string name)
         {
+            var key = name.Trim().ToUpperInvariant();
+
             var collection = this.metaClient.GetAbilities();
-            var ability = collection.FirstOrDefault(_ => _.Id == abilityId);
+            var ability = collection.FirstOrDefault(_ => _.Name.Trim().ToUpperInvariant() == key);
             if (ability is null)
-                throw new UserFriendlyException($"Unable to find ability with id {abilityId}");
+                throw new UserFriendlyException($"Unable to find ability with name {name}");
 
             var hero = this.metaClient.GetHero(ability.HeroId);
             if(hero is null)
-                throw new UserFriendlyException($"Unable to find hero with id {ability.HeroId}");
+                throw new UserFriendlyException($"Unable to find hero for ability with name {name}");
 
             var browser = await Puppeteer.ConnectAsync(this.puppeteerConfuration);
             try
