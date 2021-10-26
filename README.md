@@ -4,11 +4,6 @@ Discord bot for HGV
 
 ## TODO:
 
-Create tables for
-
-- UserLUT
-- RoleLUT
-
 - Create Commands
 
   / Profile - History

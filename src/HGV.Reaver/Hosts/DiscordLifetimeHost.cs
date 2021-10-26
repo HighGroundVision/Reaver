@@ -33,17 +33,10 @@ namespace HGV.Reaver.Hosts
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            //var clientConfiguration = new DiscordConfiguration
-            //{
-            //    Token = _token,
-            //    TokenType = TokenType.Bot,
-            //    AutoReconnect = true,
-            //    MinimumLogLevel = LogLevel.Debug,
-            //};
-            //_client = new DiscordClient(clientConfiguration);
             _client.Ready += this.OnReady;
             _client.GuildAvailable += this.OnGuildAvailable;
             _client.ClientErrored += this.OnClientError;
+            _client.MessageReactionAdded += OnMessageReactionAdded;
 
             var slashConfiguration = new SlashCommandsConfiguration
             {
@@ -83,6 +76,12 @@ namespace HGV.Reaver.Hosts
             await _client.DisconnectAsync();
         }
 
+        private Task OnMessageReactionAdded(DiscordClient sender, MessageReactionAddEventArgs e)
+        {
+            sender.Logger.LogInformation("Message Reaction Added");
+
+            return Task.CompletedTask;
+        }
 
         private Task OnReady(DiscordClient sender, ReadyEventArgs e)
         {
@@ -174,7 +173,7 @@ namespace HGV.Reaver.Hosts
                     var embed = new DiscordEmbedBuilder
                     {
                         Title = "Error",
-                        Description = $"{emoji} Uh-Oh something happened we did not count for. We have logged the error but you probly let a admin know too.",
+                        Description = $"{emoji} Uh-Oh something happened we did not expect. We have logged the error but you probly let a admin know too.",
                         Color = new DiscordColor(0xFF0000) // red
                     };
 
@@ -238,7 +237,7 @@ namespace HGV.Reaver.Hosts
                     var embed = new DiscordEmbedBuilder
                     {
                         Title = "Error",
-                        Description = $"{emoji} Uh-Oh something happened we did not count for. We have logged the error but you probly let a admin know too.",
+                        Description = $"{emoji} Uh-Oh something happened we did not expect. We have logged the error but you probly let a admin know too.",
                         Color = new DiscordColor(0xFF0000) // red
                     };
 

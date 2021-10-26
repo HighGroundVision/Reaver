@@ -1,16 +1,6 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
-using HGV.Reaver.Models;
-using HGV.Reaver.Services;
-using ImageMagick;
-using Microsoft.Extensions.Options;
-using PuppeteerSharp;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace HGV.Reaver.Commands
@@ -22,20 +12,36 @@ namespace HGV.Reaver.Commands
         {
         }
 
-        [SlashCommand("Build", "Interactivly build a Reaction Roles embed")]
-        public async Task Build(InteractionContext ctx)
+        [SlashCommand("Build", "Interactly creates a reaction roles self service embed")]
+        public async Task Build(InteractionContext ctx,
+            [Option("channel", "The channel to create the message for the self service embed.")] DiscordChannel channel
+        )
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder() { IsEphemeral = true });
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder());
 
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Error with AutoRoles"));
+            // Embed for Details on after 
+            var embed = new DiscordEmbedBuilder();
+
+            var msg = await channel.SendMessageAsync(embed);
+
+           
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
         }
 
-        [SlashCommand("Add", "Links a reaction to self service role")]
-        public async Task Add(InteractionContext ctx)
+        [SlashCommand("Remove", "Delete all self service links from the database but the messages remain.")]
+        public async Task Remove(InteractionContext ctx)
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder() { IsEphemeral = true });
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder());
 
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Error with AutoRoles"));
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Error with SelfService"));
+        }
+
+        [SlashCommand("Purge", "Delete all self service links from the database but the messages remain.")]
+        public async Task Purge(InteractionContext ctx)
+        {
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder());
+
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Error with SelfService"));
         }
     }
 }

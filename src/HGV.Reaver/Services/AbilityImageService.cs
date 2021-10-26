@@ -15,7 +15,7 @@ namespace HGV.Reaver.Services
 {
     public interface IAbilityImageService
     {
-        Task<Stream> GetWikiCard(string name);
+        Task<Stream> GetWikiCard(string id);
     }
 
     public class AbilityImageService : IAbilityImageService
@@ -31,18 +31,18 @@ namespace HGV.Reaver.Services
             this.metaClient = metaClient;
         }
 
-        public async Task<Stream> GetWikiCard(string name)
+        public async Task<Stream> GetWikiCard(string id)
         {
-            var key = name.Trim().ToUpperInvariant();
+            var abilityId = int.Parse(id);
 
             var collection = this.metaClient.GetAbilities();
-            var ability = collection.FirstOrDefault(_ => _.Name.Trim().ToUpperInvariant() == key);
+            var ability = collection.FirstOrDefault(_ => _.Id == abilityId);
             if (ability is null)
-                throw new UserFriendlyException($"Unable to find ability with name {name}");
+                throw new UserFriendlyException($"Unable to find ability {id}");
 
             var hero = this.metaClient.GetHero(ability.HeroId);
             if(hero is null)
-                throw new UserFriendlyException($"Unable to find hero for ability with name {name}");
+                throw new UserFriendlyException($"Unable to find hero {ability.HeroId}");
 
             var browser = await Puppeteer.ConnectAsync(this.puppeteerConfuration);
             try
@@ -53,6 +53,9 @@ namespace HGV.Reaver.Services
                 await page.SetViewportAsync(new ViewPortOptions { Width = 1920, Height = 1080 });
 
                 var slug = hero.Name.Replace(" ", "_");
+
+                if (slug == "Invoker") slug = "Invoker/Ability_Draft";
+
                 await page.GoToAsync($"https://dota2.fandom.com/wiki/{slug}");
 
                 await Task.Delay(TimeSpan.FromSeconds(5));
