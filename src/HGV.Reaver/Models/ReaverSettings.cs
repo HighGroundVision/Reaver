@@ -14,6 +14,7 @@ namespace HGV.Reaver.Models
         public string DiscordBotToken { get; set; }
         public string SteamKey { get; set; }
         public string StorageConnectionString { get; set; }
+        public string CosmosConnectionString { get; set; }
         public string BrowserlessToken { get; set; }
     }
 }

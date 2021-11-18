@@ -8,8 +8,8 @@ namespace HGV.Reaver.Services
 {
     public interface IProfileService
     {
-        Task<HGV.Reaver.Models.DotaProfile.DotaProfile> GetDotaProfile(string accountId);
-        Task<HGV.Reaver.Models.SteamProfile.SteamProfile> GetSteamProfile(string steamId);
+        Task<HGV.Reaver.Models.DotaProfile.DotaProfile> GetDotaProfile(ulong accountId);
+        Task<HGV.Reaver.Models.SteamProfile.SteamProfile> GetSteamProfile(ulong steamId);
     }
 
     public class ProfileService : IProfileService
@@ -23,14 +23,17 @@ namespace HGV.Reaver.Services
             this.steamKey = settings?.Value?.SteamKey;
         }
 
-        public async Task<HGV.Reaver.Models.DotaProfile.DotaProfile> GetDotaProfile(string steamId)
+        public async Task<HGV.Reaver.Models.DotaProfile.DotaProfile> GetDotaProfile(ulong steamId)
         {
             var json = await this.httpClient.GetStringAsync($"https://ad.datdota.com/api/players/{steamId}");
             var model = JsonConvert.DeserializeObject<HGV.Reaver.Models.DotaProfile.Root>(json);
-            return model.Data;
+            if (model.Data.AccountId is null)
+                return null;
+            else 
+                return model.Data;
         }
 
-        public async Task<HGV.Reaver.Models.SteamProfile.SteamProfile> GetSteamProfile(string steamId)
+        public async Task<HGV.Reaver.Models.SteamProfile.SteamProfile> GetSteamProfile(ulong steamId)
         {
             var url = string.Format("http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={0}&steamids={1}", this.steamKey, steamId);
             var json = await this.httpClient.GetStringAsync(url);

@@ -12,7 +12,7 @@ namespace HGV.Reaver.Services
 {
     public interface IRanksImageService
     {
-        Task<Uri> StorageImage(string streamId);
+        Task<Uri> StorageImage(ulong streamId);
     }
 
     public class RanksImageService : IRanksImageService
@@ -33,7 +33,7 @@ namespace HGV.Reaver.Services
             this.puppeteerConfuration = new ConnectOptions() { BrowserWSEndpoint = $"wss://chrome.browserless.io?token={token}" };
         }
 
-        public async Task<Uri> StorageImage(string streamId)
+        public async Task<Uri> StorageImage(ulong streamId)
         {
             var browser = await Puppeteer.ConnectAsync(this.puppeteerConfuration);
             try
@@ -46,7 +46,7 @@ namespace HGV.Reaver.Services
                 await page.GoToAsync($"http://ad.datdota.com/players");
                 await page.WaitForSelectorAsync("#search-box");
                 await page.FocusAsync("#search-box");
-                await page.Keyboard.TypeAsync(streamId);
+                await page.Keyboard.TypeAsync(streamId.ToString());
 
                 await page.WaitForSelectorAsync("#ratings-graph");
                 var element = await page.QuerySelectorAsync("#ratings-graph");
@@ -57,8 +57,11 @@ namespace HGV.Reaver.Services
                 var id = Guid.NewGuid();
                 var client = new BlobClient(this.connectionString, CONTAINER_NAME, $"{id}.png");
                 await client.UploadAsync(stream);
-
                 return client.Uri;
+            }
+            catch(Exception ex)
+            {
+                return null;
             }
             finally
             {

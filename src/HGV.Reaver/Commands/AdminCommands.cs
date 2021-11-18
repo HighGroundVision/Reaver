@@ -2,14 +2,9 @@
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
-using HGV.Reaver.Models;
-using HGV.Reaver.Services;
-using ImageMagick;
-using Microsoft.Extensions.Options;
-using PuppeteerSharp;
-using System;
+using HGV.Reaver.Factories;
+using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -25,8 +20,9 @@ namespace HGV.Reaver.Commands
         {
             var collection = new List<DiscordApplicationCommandOptionChoice>();
 
-            var client = this.Services.GetService(typeof(DiscordClient)) as DiscordClient;
-            var commands = await client.GetGlobalApplicationCommandsAsync();
+            
+            var factory = this.Services.GetService<IDiscordClientFactory>();
+            var commands = await factory.Client.GetGlobalApplicationCommandsAsync();
             var privateCommands = commands.Where(i => i.DefaultPermission == false);
 
             foreach (var cmd in privateCommands)

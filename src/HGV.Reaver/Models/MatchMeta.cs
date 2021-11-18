@@ -10,6 +10,7 @@ namespace HGV.Reaver.Models.Meta
     {
         public const string OK = "ok";
         public const string Error = "error-not-found";
+        public const string Parsed = "parsed";
     }
 
     public class MatchMeta

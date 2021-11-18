@@ -1,5 +1,5 @@
 ﻿using DSharpPlus;
-using HGV.Reaver.Handlers;
+using HGV.Reaver.Data;
 using HGV.Reaver.Models;
 using HGV.Reaver.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -14,12 +14,12 @@ namespace HGV.Reaver.Controllers
     public class AccountController : Controller
     {
         private readonly IAccountService accountService;
-        private readonly IChangeNicknameHandler handler;
+        private readonly IProfileService profileService;
 
-        public AccountController(IAccountService accountService, IChangeNicknameHandler handler)
+        public AccountController(IAccountService accountService, IProfileService profileService)
         {
             this.accountService = accountService;
-            this.handler = handler;
+            this.profileService = profileService;
         }
 
         [Authorize(AuthenticationSchemes = "Discord")]
@@ -28,20 +28,21 @@ namespace HGV.Reaver.Controllers
             if (string.IsNullOrWhiteSpace(id))
                 throw new ArgumentNullException(nameof(id));
 
-            var entity = new UserEntity();
-            entity.PartitionKey = id;
+            var entity = new UserLinkEntity();
+            entity.GuidId = ulong.Parse(id);
 
             foreach (var claim in this.User.Claims)
             {
                 switch (claim.Type)
                 {
                     case "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier":
-                        entity.RowKey = claim.Value;
-                        entity.DiscordId = claim.Value;
+                        entity.UserId = ulong.Parse(claim.Value);            
                         break;
                     case "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress":
                         entity.Email = claim.Value;
                         break;
+                    // http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name
+                    // urn:discord:avatar:url
                     default:
                         break;
                 }
@@ -58,23 +59,28 @@ namespace HGV.Reaver.Controllers
         public async Task<IActionResult> Verify(string id)
         {
             var json = this.TempData[id] as string;
-            var entity = JsonConvert.DeserializeObject<UserEntity>(json);
+            var entity = JsonConvert.DeserializeObject<UserLinkEntity>(json);
 
             foreach (var claim in this.User.Claims)
             {
                 switch (claim.Type)
                 {
                     case "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier":
-                        entity.SteamId = claim.Value.Replace("https://steamcommunity.com/openid/id/", "");
+                        var openId = claim.Value.Replace("https://steamcommunity.com/openid/id/", "");
+                        var steamId = ulong.Parse(openId);
+                        entity.SteamId = steamId;
                         break;
+                    // http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name RGBKnights
                     default:
                         break;
                 }
             }
 
-            await this.accountService.AddLink(entity);
+            //var dota = await this.profileService.GetDotaProfile(entity.SteamId);
+            //var steam = await this.profileService.GetSteamProfile(entity.SteamId);
+            //entity.DotaId = dota.AccountId.GetValueOrDefault();
 
-            await this.handler.ChangeNickname(entity);
+            await this.accountService.Add(entity);
 
             return RedirectToAction("Linked");
         }
@@ -85,3 +91,4 @@ namespace HGV.Reaver.Controllers
         }
     }
 }
+

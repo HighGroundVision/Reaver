@@ -1,7 +1,6 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using HGV.Reaver.Handlers;
 using HGV.Reaver.Services;
 using System;
 using System.Threading.Tasks;
@@ -16,14 +15,12 @@ namespace HGV.Reaver.Commands
         private readonly IAccountService accountService;
         private readonly IProfileService profileService;
         private readonly IRanksImageService ranksImageService;
-        private readonly IChangeNicknameHandler handler;
 
-        public ProfileContextMenu(IAccountService accountService, IProfileService profileService, IRanksImageService ranksImageService, IChangeNicknameHandler handler)
+        public ProfileContextMenu(IAccountService accountService, IProfileService profileService, IRanksImageService ranksImageService)
         {
             this.accountService = accountService;
             this.profileService = profileService;
             this.ranksImageService = ranksImageService;
-            this.handler = handler;
         }
 
         [ContextMenu(ApplicationCommandType.UserContextMenu, "Refresh", false)]
@@ -31,46 +28,64 @@ namespace HGV.Reaver.Commands
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder() { IsEphemeral = true });
 
-            await this.handler.ChangeNickname(ctx.TargetMember);
+            var account = await this.accountService.Get(ctx.Member.Guild.Id, ctx.TargetMember.Id);
+            var dota = await this.profileService.GetDotaProfile(account.SteamId);
+            var steam = await this.profileService.GetSteamProfile(account.SteamId);
+
+            var nickname = steam?.Persona ?? dota.Nickname;
+            if (nickname is not null)
+            {
+                await ctx.TargetMember.ModifyAsync(x => x.Nickname = nickname);
+            }
 
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Done!"));
         }
 
-        [ContextMenu(ApplicationCommandType.UserContextMenu, "Profile")]
+        [ContextMenu(ApplicationCommandType.UserContextMenu, "Profile", false)]
         public async Task GetProfile(ContextMenuContext ctx)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder() { IsEphemeral = true });
 
-            var user = await this.accountService.GetLinkedAccount(ctx.Guild.Id, ctx.TargetMember.Id);
-            var profile = await this.profileService.GetDotaProfile(user.SteamId);
+            var user = await this.accountService.Get(ctx.Guild.Id, ctx.TargetMember.Id);
+            if (user is null)
+                throw new AccountNotLinkedException();
+
+            var dota = await this.profileService.GetDotaProfile(user.SteamId);
+            if (dota is null)
+                throw new UserFriendlyException("Dota Account Not Found; You have not played an AD game in a while.");
+
+            var steam = await this.profileService.GetSteamProfile(user.SteamId);
+            if (steam is null)
+                throw new UserFriendlyException("Steam Account Not Found; It may not be public.");
+
             var url = await this.ranksImageService.StorageImage(user.SteamId);
 
-            if (profile.AccountId is null)
-                throw new UserFriendlyException("No Ability Draft Profile found.");
 
             var builder = new DiscordEmbedBuilder()
-                .WithTitle(profile.Nickname)
-                .WithUrl($"http://steamcommunity.com/profiles/{user.SteamId}/")
-                .WithThumbnail(profile.Avatar ?? DEFAULT_IMAGE_URL)
-                .WithImageUrl(url)
+                .WithTitle(steam.Persona)
+                .WithUrl(steam.ProfileUrl)
+                .WithThumbnail(steam?.AvatarLarge ?? DEFAULT_IMAGE_URL)
                 .WithColor(DiscordColor.Purple);
 
-            var delta = DateTime.UtcNow - profile.LastMatch;
-            if (delta.HasValue == false)
-                builder.WithFooter($"To long ago; Go play more Dota.");
-            else if (delta.Value.Days < 1)
-                builder.WithFooter($"last played today!");
-            else
-                builder.WithFooter($"last played {delta.Value.Days} days ago...");
+            if (url is not null)
+                builder.WithImageUrl(url);
 
-            builder.AddField("ID", profile.AccountId.ToString(), false);
-            builder.AddField("TOTAL", ((profile?.WinLoss?.Wins ?? 0) + (profile?.WinLoss?.Losses ?? 0)).ToString(), true);
-            builder.AddField("WINRATE", (profile.WinLoss?.Winrate ?? 0).ToString("P"), true);
-            builder.AddField("WIN/LOSE", $"{(profile?.WinLoss?.Wins ?? 0)} - {(profile?.WinLoss?.Losses ?? 0)}", true);
-            builder.AddField("RATING", (profile?.Rating ?? 0).ToString("F0"), false);
-            builder.AddField("REGION", profile.Region.ToUpper(), true);
-            builder.AddField("REGIONAL", $"#{profile.RegionalRank}", true);
-            builder.AddField("WORLD", $"#{profile.OverallRank}", true);
+            var delta = DateTime.UtcNow - dota.LastMatch;
+            if (delta.HasValue == false)
+                builder.WithFooter($"Last played to long ago; Go play more Dota.");
+            else if (delta.Value.Days < 1)
+                builder.WithFooter($"Last played {delta.Value.Hours} hours ago.");
+            else
+                builder.WithFooter($"Last played {delta.Value.Days} days ago.");
+
+            builder.AddField("ID", dota.AccountId.ToString(), false);
+            builder.AddField("TOTAL", ((dota?.WinLoss?.Wins ?? 0) + (dota?.WinLoss?.Losses ?? 0)).ToString(), true);
+            builder.AddField("WIN RATE", (dota.WinLoss?.Winrate ?? 0).ToString("P"), true);
+            builder.AddField("RECORD", $"{(dota?.WinLoss?.Wins ?? 0)} - {(dota?.WinLoss?.Losses ?? 0)}", true);
+            builder.AddField("RATING", (dota?.Rating ?? 0).ToString("F0"), false);
+            builder.AddField("REGION", dota.Region.ToUpper(), true);
+            builder.AddField("REGIONAL", $"#{dota.RegionalRank}", true);
+            builder.AddField("WORLD", $"#{dota.OverallRank}", true);
 
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(builder));
         }

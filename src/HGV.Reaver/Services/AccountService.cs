@@ -1,60 +1,53 @@
-﻿using Azure.Data.Tables;
-using DSharpPlus;
-using HGV.Reaver.Models;
-using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
+﻿using HGV.Reaver.Data;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace HGV.Reaver.Services
 {
     public interface IAccountService
     {
-        Task AddLink(UserEntity user);
-        Task RemoveLink(ulong GuildId, ulong UserId);
-        Task<UserEntity> GetLinkedAccount(ulong GuildId, ulong UserId);
+        Task Add(UserLinkEntity user);
+        Task Remove(ulong GuildId, ulong UserId);
+        Task<UserLinkEntity> Get(ulong GuildId, ulong UserId);
     }
 
     public class AccountService : IAccountService
     {
-        private const string TABLE_NAME = "userLUT";
-        
-        private readonly TableClient tableClient;
+        private readonly ReaverContext context;
 
-        public AccountService(IOptions<ReaverSettings> settings)
+        public AccountService(ReaverContext context)
         {
-            var connectionString = settings.Value?.StorageConnectionString ?? throw new ConfigurationValueMissingException(nameof(ReaverSettings.StorageConnectionString));
-            this.tableClient = new TableClient(connectionString, TABLE_NAME);
-            this.tableClient.CreateIfNotExists();
+            this.context = context;
         }
 
-        public async Task AddLink(UserEntity user)
+        public async Task Add(UserLinkEntity user)
         {
-            await this.tableClient.UpsertEntityAsync(user, TableUpdateMode.Replace);
+            var existing = await this.context.UserLinks.FirstOrDefaultAsync(i => i.GuidId == user.GuidId && i.UserId == user.UserId);
+            if(existing == null)
+            {
+                await this.context.AddAsync(user);
+            }
+            else
+            {
+                existing.SteamId = user.SteamId;
+                existing.Email = user.Email;
+            }
+
+            await this.context.SaveChangesAsync();
         }
 
-        public async Task RemoveLink(ulong GuildId, ulong UserId)
+        public async Task Remove(ulong GuildId, ulong UserId)
         {
-            try
-            {
-                await this.tableClient.DeleteEntityAsync(GuildId.ToString(), UserId.ToString());
-            }
-            catch (Exception)
-            {
-            }
+            var collection = await this.context.UserLinks.Where(i => i.GuidId == GuildId && i.UserId == UserId).ToListAsync();
+            this.context.RemoveRange(collection);
+            await this.context.SaveChangesAsync();
         }
 
-        public async Task<UserEntity> GetLinkedAccount(ulong GuildId, ulong UserId)
+        public async Task<UserLinkEntity> Get(ulong GuildId, ulong UserId)
         {
-            try
-            {
-                var reponse = await this.tableClient.GetEntityAsync<UserEntity>(GuildId.ToString(), UserId.ToString());
-                return reponse.Value;
-            }
-            catch (Azure.RequestFailedException)
-            {
-                throw new AccountNotLinkedException();
-            }
+            var entity = await this.context.UserLinks.Where(i => i.GuidId == GuildId && i.UserId == UserId).FirstOrDefaultAsync();
+            return entity;
         }
 
     }

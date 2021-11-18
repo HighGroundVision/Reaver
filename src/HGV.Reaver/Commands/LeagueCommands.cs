@@ -1,14 +1,7 @@
-﻿using Azure.Data.Tables;
-using DSharpPlus;
+﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using HGV.Reaver.Models;
-using HGV.Reaver.Services;
-using Microsoft.Extensions.Options;
-using System;
-using System.Linq;
 using System.Threading.Tasks;
-
 
 namespace HGV.Reaver.Commands
 {
