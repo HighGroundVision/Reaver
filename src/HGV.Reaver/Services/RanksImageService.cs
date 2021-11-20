@@ -19,12 +19,14 @@ namespace HGV.Reaver.Services
     {
         private const string CONTAINER_NAME = "temp";
 
+        private readonly string windrunUrl;
         private readonly string connectionString;
         private readonly ConnectOptions puppeteerConfuration;
 
         public RanksImageService(IOptions<ReaverSettings> settings)
         {
             this.connectionString = settings?.Value?.StorageConnectionString ?? throw new ConfigurationValueMissingException(nameof(ReaverSettings.StorageConnectionString));
+            this.windrunUrl = settings?.Value?.WindrunUrl ?? throw new ConfigurationValueMissingException(nameof(ReaverSettings.WindrunUrl));
 
             var client = new BlobContainerClient(this.connectionString, CONTAINER_NAME);
             client.CreateIfNotExistsAsync(PublicAccessType.BlobContainer);
@@ -43,7 +45,7 @@ namespace HGV.Reaver.Services
 
                 await page.SetViewportAsync(new ViewPortOptions { Width = 1280, Height = 720 });
 
-                await page.GoToAsync($"http://ad.datdota.com/players");
+                await page.GoToAsync($"{windrunUrl}/players");
                 await page.WaitForSelectorAsync("#search-box");
                 await page.FocusAsync("#search-box");
                 await page.Keyboard.TypeAsync(streamId.ToString());

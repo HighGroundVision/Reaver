@@ -13,6 +13,7 @@ namespace HGV.Reaver.Data
 
         public ulong UserId { get; set; }
         public ulong SteamId { get; set; }
+        public uint DotaId => (uint)(SteamId - 76561197960265728L);
         public string Email { get; set; }
 
         public string ETag { get; set; }

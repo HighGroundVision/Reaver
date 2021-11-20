@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using HGV.Reaver.Models;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System.Linq;
 using System.Net.Http;
@@ -14,18 +15,20 @@ namespace HGV.Reaver.Services
 
     public class ProfileService : IProfileService
     {
+        private readonly string windrunUrl;
         private readonly HttpClient httpClient;
         private readonly string steamKey;
 
-        public ProfileService(HttpClient client, IOptions<Models.ReaverSettings> settings)
+        public ProfileService(HttpClient client, IOptions<ReaverSettings> settings)
         {
+            this.windrunUrl = settings?.Value?.WindrunUrl ?? throw new ConfigurationValueMissingException(nameof(ReaverSettings.WindrunUrl));
             this.httpClient = client;
             this.steamKey = settings?.Value?.SteamKey;
         }
 
         public async Task<HGV.Reaver.Models.DotaProfile.DotaProfile> GetDotaProfile(ulong steamId)
         {
-            var json = await this.httpClient.GetStringAsync($"https://ad.datdota.com/api/players/{steamId}");
+            var json = await this.httpClient.GetStringAsync($"{windrunUrl}/api/players/{steamId}");
             var model = JsonConvert.DeserializeObject<HGV.Reaver.Models.DotaProfile.Root>(json);
             if (model.Data.AccountId is null)
                 return null;

@@ -1,6 +1,8 @@
 ﻿using HGV.Basilius;
 using HGV.Basilius.Client;
+using HGV.Reaver.Models;
 using HGV.Reaver.Models.Abilities;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,11 +18,13 @@ namespace HGV.Reaver.Services
 
     public class AbilityStatsService : IAbilityStatsService
     {
+        private readonly string windrunUrl;
         private readonly HttpClient httpClient;
         private readonly IMetaClient metaClient;
 
-        public AbilityStatsService(HttpClient client, IMetaClient metaClient)
+        public AbilityStatsService(IOptions<ReaverSettings> settings, HttpClient client, IMetaClient metaClient)
         {
+            this.windrunUrl = settings?.Value?.WindrunUrl ?? throw new ConfigurationValueMissingException(nameof(ReaverSettings.WindrunUrl));
             this.httpClient = client;
             this.metaClient = metaClient;
         }
@@ -29,7 +33,7 @@ namespace HGV.Reaver.Services
         {
             var abilities = this.metaClient.GetAbilities();
 
-            var json = await this.httpClient.GetStringAsync($"https://ad.datdota.com/api/abilities");
+            var json = await this.httpClient.GetStringAsync($"{windrunUrl}/api/abilities");
             var model = JsonConvert.DeserializeObject<Root>(json);
 
             var collection = model.Data.AbilityStats

@@ -2,8 +2,10 @@
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using HGV.Basilius.Client;
+using HGV.Reaver.Models;
 using HGV.Reaver.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -50,12 +52,14 @@ namespace HGV.Reaver.Commands
     {
         //private readonly string DEFAULT_FOOTER_URL = "https://hyperstone.highgroundvision.com/images/wards/observer.png";
 
+        private readonly string windrunUrl;
         private readonly IAbilityStatsService abilityStatsService;
         private readonly IAbilityImageService abilityImageService;
         private readonly IMetaClient metaClient;
 
-        public AbilityCommands(IAbilityStatsService abilityStatsService, IAbilityImageService abilityImageService, IMetaClient metaClient)
+        public AbilityCommands(IOptions<ReaverSettings> settings, IAbilityStatsService abilityStatsService, IAbilityImageService abilityImageService, IMetaClient metaClient)
         {
+            this.windrunUrl = settings?.Value?.WindrunUrl ?? throw new ConfigurationValueMissingException(nameof(ReaverSettings.WindrunUrl));
             this.abilityStatsService = abilityStatsService;
             this.abilityImageService = abilityImageService;
             this.metaClient = metaClient;
@@ -86,12 +90,12 @@ namespace HGV.Reaver.Commands
             await CreateMessage(ctx, ability, imageUrl);
         }
 
-        private static async Task CreateMessage(InteractionContext ctx, Models.Abilities.AbilityStat ability, Uri imageUrl)
+        private async Task CreateMessage(InteractionContext ctx, Models.Abilities.AbilityStat ability, Uri imageUrl)
         {
             var builder = new DiscordEmbedBuilder()
                 .WithTitle(ability.Name)
                 .WithDescription(ability.Description)
-                .WithUrl($"http://ad.datdota.com/abilities/{ability.AbilityId}/")
+                .WithUrl($"{windrunUrl}/abilities/{ability.AbilityId}/")
                 .WithColor(DiscordColor.Purple);
 
             if (imageUrl is not null)
