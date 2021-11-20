@@ -94,7 +94,7 @@ namespace HGV.Reaver.Commands
                 .WithUrl($"http://ad.datdota.com/abilities/{ability.AbilityId}/")
                 .WithColor(DiscordColor.Purple);
 
-            if (imageUrl is null)
+            if (imageUrl is not null)
                 builder.WithImageUrl(imageUrl);
 
             builder.AddField("AVG PICK", $"#{Math.Round(ability.AvgPickPosition, 0)}", true);
