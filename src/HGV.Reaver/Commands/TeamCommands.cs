@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace HGV.Reaver.Commands
 {
 
-    [SlashCommandGroup("Teams", "Teams Commands")]
+    [SlashCommandGroup("Team", "Teams Commands")]
     public class TeamCommands : ApplicationCommandModule
     {
         private const string DEFAULT_IMAGE_URL = "https://steamuserimages-a.akamaihd.net/ugc/868480752636433334/1D2881C5C9B3AD28A1D8852903A8F9E1FF45C2C8/";
