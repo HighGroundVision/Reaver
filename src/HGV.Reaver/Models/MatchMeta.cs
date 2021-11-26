@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace HGV.Reaver.Models.Meta
+namespace HGV.Reaver.Models.MatchData
 {
     public class MatchMetaStatus
     {
@@ -16,7 +16,7 @@ namespace HGV.Reaver.Models.Meta
     public class MatchMeta
     {
         [JsonProperty("status")]
-        public string Status { get; set; }
+        public string? Status { get; set; }
 
         [JsonProperty("date_created")]
         public DateTime? DateCreated { get; set; }
@@ -25,7 +25,7 @@ namespace HGV.Reaver.Models.Meta
         public DateTime? GameStart { get; set; }
 
         [JsonProperty("state")]
-        public string State { get; set; }
+        public string? State { get; set; }
 
         [JsonProperty("replay_url_acquired")]
         public bool? ReplayUrlAcquired { get; set; }

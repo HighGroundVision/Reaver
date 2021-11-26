@@ -57,7 +57,7 @@ namespace HGV.Reaver.Commands
             var dota = await this.profileService.GetDotaProfile(account.SteamId);
             var steam = await this.profileService.GetSteamProfile(account.SteamId);
 
-            var nickname = steam?.Persona ?? dota.Nickname;
+            var nickname = steam?.Persona ?? dota?.Nickname;
             if (nickname is not null)
             {
                 await ctx.Member.ModifyAsync(x => x.Nickname = nickname);

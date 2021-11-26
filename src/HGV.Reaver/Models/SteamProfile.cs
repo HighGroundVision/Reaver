@@ -11,39 +11,39 @@ namespace HGV.Reaver.Models.SteamProfile
 		public ulong SteamId { get; set; }
 
 		[Newtonsoft.Json.JsonProperty("personaname")]
-		public string Persona { get; set; }
+		public string? Persona { get; set; }
 
 		[Newtonsoft.Json.JsonProperty("realname")]
-		public string Name { get; set; }
+		public string? Name { get; set; }
 
 		[Newtonsoft.Json.JsonProperty("profileurl")]
-		public string ProfileUrl { get; set; }
+		public string? ProfileUrl { get; set; }
 
 		[Newtonsoft.Json.JsonProperty("avatar")]
-		public string AvatarSmall { get; set; }
+		public string? AvatarSmall { get; set; }
 
 		[Newtonsoft.Json.JsonProperty("avatarmedium")]
-		public string AvatarMedium { get; set; }
+		public string? AvatarMedium { get; set; }
 
 		[Newtonsoft.Json.JsonProperty("avatarfull")]
-		public string AvatarLarge { get; set; }
+		public string? AvatarLarge { get; set; }
 
 		[Newtonsoft.Json.JsonProperty("loccountrycode")]
-		public string CountryCode { get; set; }
+		public string? CountryCode { get; set; }
 
 		[Newtonsoft.Json.JsonProperty("locstatecode")]
-		public string StateCode { get; set; }
+		public string? StateCode { get; set; }
 	}
 
 	public class Root
 	{
 		[Newtonsoft.Json.JsonProperty("response")]
-		public PlayerSummariesReponse Response { get; set; }
+		public PlayerSummariesReponse? Response { get; set; }
 	}
 
 	public class PlayerSummariesReponse
 	{
 		[Newtonsoft.Json.JsonProperty("players")]
-		public List<SteamProfile> Profiles { get; set; }
+		public List<SteamProfile> Profiles { get; set; } = new List<SteamProfile>();
 	}
 }

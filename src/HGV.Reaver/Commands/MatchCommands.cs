@@ -3,7 +3,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using HGV.Basilius.Client;
 using HGV.Reaver.Models;
-using HGV.Reaver.Models.Meta;
+using HGV.Reaver.Models.MatchData;
 using HGV.Reaver.Services;
 using Microsoft.Extensions.Options;
 using System;
@@ -38,12 +38,13 @@ namespace HGV.Reaver.Commands
             var meta = await this.matchServices.GetMeta(matchId);
             if (meta.Status == MatchMetaStatus.OK && meta.State == MatchMetaStatus.Parsed)
             {
-                var user = await this.accountService.Get(ctx.Guild.Id, ctx.Member.Id);
-
                 var match = await this.matchServices.GetMatch(matchId);
+                if (match is null)
+                    throw new NullReferenceException("MatchCommands::Card::Match");
+
                 var url = await this.draftImageService.StorageMatchPlayersImage(matchId);
 
-                var duration = TimeSpan.FromSeconds(match.Duration);
+                var duration = TimeSpan.FromSeconds(match.Duration ?? 0);
                 var victory = match.RadiantWin == true ? "Radiant" : "Dire";
                 var builder = new DiscordEmbedBuilder()
                     .WithTitle($"{match.MatchId}")
@@ -53,8 +54,8 @@ namespace HGV.Reaver.Commands
                 if (url is not null)
                     builder.WithImageUrl(url);
 
-                var radiantAvg = (int)Math.Round(match.Radiant.Average(_ => _.Rating), 0);
-                var direAvg = (int)Math.Round(match.Dire.Average(_ => _.Rating), 0);
+                var radiantAvg = (int)Math.Round(match.Radiant.Average(_ => _.Rating ?? 0), 0);
+                var direAvg = (int)Math.Round(match.Dire.Average(_ => _.Rating ?? 0), 0);
                 var ratingAvg = (int)Math.Round((radiantAvg + direAvg) / 2.0, 0);
 
                 
@@ -66,13 +67,15 @@ namespace HGV.Reaver.Commands
                 builder.AddField("RADIANT RATING", $"{radiantAvg}", true);
                 builder.AddField("DIRE RATING", $"{direAvg}", true);
 
-                var player = match.Radiant.FirstOrDefault(_ => _.SteamId == user.DotaId) ?? match.Dire.FirstOrDefault(_ => _.SteamId == user.DotaId);
-                if (player is not null)
+                var user = await this.accountService.Get(ctx.Guild.Id, ctx.Member.Id);
+                if(user is not null)
                 {
-                    var hero = metaClient.GetHero(player.Hero);
-                    builder.AddField("HERO", $"{hero.Name ?? "Unknown"}", true);
-                    builder.AddField("K/D/A", $"{player.Kills}/{player.Deaths}/{player.Assists}", true);
-                    builder.AddField("CS/GPM", $"{player.LastHits}/{player.Gpm}", true);
+                    var accountID = user.GetSteamId().AccountID;
+                    var player = match.Radiant.FirstOrDefault(_ => _.SteamId == accountID) ?? match.Dire.FirstOrDefault(_ => _.SteamId == accountID);
+                    var hero = metaClient.GetHero(player?.Hero ?? 0);
+                    builder.AddField("HERO", $"{hero?.Name ?? "Unknown"}", true);
+                    builder.AddField("K/D/A", $"{player?.Kills ?? 0}/{player?.Deaths ?? 0}/{player?.Assists ?? 0}", true);
+                    builder.AddField("CS/GPM", $"{player?.LastHits ?? 0}/{player?.Gpm ?? 0}", true);
                 }
 
 

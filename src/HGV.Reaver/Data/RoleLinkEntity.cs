@@ -12,9 +12,9 @@ namespace HGV.Reaver.Data
         public ulong GuidId { get; set; }
 
         public ulong MessageId { get; set; }
-        public string EmojiName { get; set; }
+        public string EmojiName { get; set; } = string.Empty;
         public ulong RoleId { get; set; }
 
-        public string ETag { get; set; }
+        public string ETag { get; set; } = string.Empty;
     }
 }

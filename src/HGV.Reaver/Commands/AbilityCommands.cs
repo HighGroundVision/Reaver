@@ -22,11 +22,11 @@ namespace HGV.Reaver.Commands
 
         public Task<IEnumerable<DiscordAutoCompleteChoice>> Provider(AutocompleteContext ctx)
         {
-            var client = ctx.Services.GetService<IMetaClient>();
+            var client = ctx.Services.GetService<IMetaClient>() ?? throw new NullReferenceException("AbilityAutocompleteProvider::Provider::IMetaClient");
 
             var collection = new List<DiscordAutoCompleteChoice>();
 
-            var option = ctx.OptionValue.ToString().ToLower();
+            var option = ctx.OptionValue?.ToString()?.ToLower() ?? string.Empty;
             var heroes = client.GetHeroes();
             var abilties = client.GetAbilities();
 
@@ -60,9 +60,9 @@ namespace HGV.Reaver.Commands
         public AbilityCommands(IOptions<ReaverSettings> settings, IAbilityStatsService abilityStatsService, IAbilityImageService abilityImageService, IMetaClient metaClient)
         {
             this.windrunUrl = settings?.Value?.WindrunUrl ?? throw new ConfigurationValueMissingException(nameof(ReaverSettings.WindrunUrl));
-            this.abilityStatsService = abilityStatsService;
-            this.abilityImageService = abilityImageService;
-            this.metaClient = metaClient;
+            this.abilityStatsService = abilityStatsService ?? throw new NullReferenceException("AbilityCommands::IAbilityStatsService");
+            this.abilityImageService = abilityImageService ?? throw new NullReferenceException("AbilityCommands::IAbilityImageService");
+            this.metaClient = metaClient ?? throw new NullReferenceException("AbilityCommands::IMetaClient");
         }
 
         [SlashCommand("Card", "A card with details from the wiki including stats.")]
@@ -85,12 +85,12 @@ namespace HGV.Reaver.Commands
                 heroSlug = "Invoker/Ability_Draft";
 
             var wikiUrl = $"https://dota2.fandom.com/wiki/{heroSlug}";
-            var imageUrl = await this.abilityImageService.StorageImage(wikiUrl, ability.Name);
+            var imageUrl = await this.abilityImageService.StorageImage(wikiUrl, ability.Name ?? string.Empty);
 
             await CreateMessage(ctx, ability, imageUrl);
         }
 
-        private async Task CreateMessage(InteractionContext ctx, Models.Abilities.AbilityStat ability, Uri imageUrl)
+        private async Task CreateMessage(InteractionContext ctx, Models.Abilities.AbilityStat ability, Uri? imageUrl)
         {
             var builder = new DiscordEmbedBuilder()
                 .WithTitle(ability.Name)

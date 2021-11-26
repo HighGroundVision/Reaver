@@ -59,7 +59,12 @@ namespace HGV.Reaver.Controllers
         public async Task<IActionResult> Verify(string id)
         {
             var json = this.TempData[id] as string;
+            if (json is null)
+                throw new NullReferenceException("AccountController::Verify::Json");
+
             var entity = JsonConvert.DeserializeObject<UserLinkEntity>(json);
+            if (entity is null)
+                throw new NullReferenceException("AccountController::Verify::DeserializeObject::UserLinkEntity");
 
             foreach (var claim in this.User.Claims)
             {

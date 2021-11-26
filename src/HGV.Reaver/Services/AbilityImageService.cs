@@ -16,7 +16,7 @@ namespace HGV.Reaver.Services
 {
     public interface IAbilityImageService
     {
-        Task<Uri> StorageImage(string url, string name);
+        Task<Uri?> StorageImage(string url, string name);
     }
 
     public class AbilityImageService : IAbilityImageService
@@ -37,7 +37,7 @@ namespace HGV.Reaver.Services
             this.metaClient = metaClient;
         }
 
-        public async Task<Uri> StorageImage(string url, string name)
+        public async Task<Uri?> StorageImage(string url, string name)
         {
             var browser = await Puppeteer.ConnectAsync(this.puppeteerConfuration);
             try
@@ -60,7 +60,7 @@ namespace HGV.Reaver.Services
                 await client.UploadAsync(stream);
                 return client.Uri;
             }
-            catch(Exception ex)
+            catch(Exception)
             {
                 return null;
             }

@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using HGV.Reaver.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,12 +11,11 @@ namespace HGV.Reaver.Data
     {
         public Guid Id { get; set; }
         public ulong GuidId { get; set; }
-
         public ulong UserId { get; set; }
         public ulong SteamId { get; set; }
-        public uint DotaId => (uint)(SteamId - 76561197960265728L);
-        public string Email { get; set; }
+        public string? Email { get; set; }
+        public string ETag { get; set; } = string.Empty;
 
-        public string ETag { get; set; }
+        public SteamID GetSteamId() => new SteamID(this.SteamId);
     }
 }

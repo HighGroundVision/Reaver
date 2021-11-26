@@ -54,7 +54,7 @@ namespace HGV.Reaver.Commands
             await  CreateMessage(ctx, dota, steam, url);
         }
 
-        private static async Task CreateMessage(InteractionContext ctx, Models.DotaProfile.DotaProfile dota, Models.SteamProfile.SteamProfile steam, Uri url)
+        private static async Task CreateMessage(InteractionContext ctx, Models.DotaProfile.DotaProfile dota, Models.SteamProfile.SteamProfile steam, Uri? url)
         {
             var builder = new DiscordEmbedBuilder()
                 .WithTitle(steam.Persona)
@@ -73,14 +73,26 @@ namespace HGV.Reaver.Commands
             else
                 builder.WithFooter($"Last played {delta.Value.Days} days ago.");
 
-            builder.AddField("ID", dota.AccountId.ToString(), false);
-            builder.AddField("TOTAL", ((dota?.WinLoss?.Wins ?? 0) + (dota?.WinLoss?.Losses ?? 0)).ToString(), true);
-            builder.AddField("WIN RATE", (dota.WinLoss?.Winrate ?? 0).ToString("P"), true);
-            builder.AddField("RECORD", $"{(dota?.WinLoss?.Wins ?? 0)} - {(dota?.WinLoss?.Losses ?? 0)}", true);
-            builder.AddField("RATING", (dota?.Rating ?? 0).ToString("F0"), false);
-            builder.AddField("REGION", dota.Region.ToUpper(), true);
-            builder.AddField("REGIONAL", $"#{dota.RegionalRank}", true);
-            builder.AddField("WORLD", $"#{dota.OverallRank}", true);
+            var accountId = dota?.AccountId ?? 0;
+            var wins = dota?.WinLoss?.Wins ?? 0;
+            var losses = dota?.WinLoss?.Losses ?? 0;
+            var total = wins + losses;
+            var winrate = dota?.WinLoss?.Winrate ?? 0;
+            var region = dota?.Region ?? "Unknown";
+            var rating = dota?.Rating ?? 0;
+            var regionalRank = dota?.RegionalRank ?? 0;
+            var rRank = regionalRank > 0 ? $"#{regionalRank}" : "N/A";
+            var overallRank = dota?.RegionalRank ?? 0;
+            var oRank = overallRank > 0 ? $"#{overallRank}" : "N/A";
+
+            builder.AddField("ID", accountId.ToString(), false);
+            builder.AddField("TOTAL", total.ToString(), true);
+            builder.AddField("WIN RATE", winrate.ToString("P"), true);
+            builder.AddField("RECORD", $"{wins} - {losses}", true);
+            builder.AddField("RATING", rating.ToString("F0"), false);
+            builder.AddField("REGION", region.ToUpper(), true);
+            builder.AddField("REGIONAL", $"{rRank}", true);
+            builder.AddField("WORLD", $"{oRank}", true);
 
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(builder));
         }

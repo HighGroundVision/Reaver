@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <Nullable>enable</Nullable>
     <UserSecretsId>aspnet-HGV.Reaver-CA5A2CA4-97B6-4F9D-A40D-F87F2FAE9882</UserSecretsId>
   </PropertyGroup>
 

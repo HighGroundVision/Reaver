@@ -1,7 +1,8 @@
 ﻿using HGV.Reaver.Models;
-using HGV.Reaver.Models.Meta;
+using HGV.Reaver.Models.MatchData;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -28,14 +29,14 @@ namespace HGV.Reaver.Services
         {
             var json = await this.httpClient.GetStringAsync($"{windrunUrl}/api/matches/{matchId}/meta");
             var model = JsonConvert.DeserializeObject<MatchMeta>(json);
-            return model;
+            return model ?? throw new NullReferenceException("IMatchServices::GetMeta::DeserializeObject::MatchMeta");
         }
 
         public async Task<MatchData> GetMatch(long matchId)
         {
             var json = await this.httpClient.GetStringAsync($"{windrunUrl}/api/matches/{matchId}");
             var model = JsonConvert.DeserializeObject<MatchReponse>(json);
-            return model.Data;
+            return model?.Data ?? throw new NullReferenceException("IMatchServices::GetMatch::DeserializeObject::MatchMeta"); ;
         }
     }
 }

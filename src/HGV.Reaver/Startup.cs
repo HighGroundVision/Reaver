@@ -54,6 +54,7 @@ namespace HGV.Reaver
             services.AddHttpClient<IProfileService, ProfileService>();
             services.AddHttpClient<IMatchServices, MatchServices>();
             services.AddHttpClient<IAbilityStatsService, AbilityStatsService>();
+            services.AddHttpClient<IFaceItChampionshipsService, FaceItChampionshipsService>();
 
             services.AddSingleton<IDiscordClientFactory, DiscordClientFactory>();
             services.AddSingleton<IMatchImageService, MatchImageService>();

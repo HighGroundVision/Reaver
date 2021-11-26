@@ -21,39 +21,39 @@ namespace HGV.Reaver.Models.Abilities
         public double Winrate { get; set; }
 
         [JsonIgnore()]
-        public double Value { get; internal set; }
+        public double Value { get;  set; }
 
         [JsonIgnore()]
-        public int HeroId { get; internal set; }
+        public int HeroId { get;  set; }
 
         [JsonIgnore()]
-        public string Image { get; internal set; }
+        public string? Image { get;  set; }
 
         [JsonIgnore()]
-        public string Name { get; internal set; }
+        public string? Name { get;  set; }
 
         [JsonIgnore()]
-        public string Description { get; internal set; }
+        public string? Description { get;  set; }
 
         [JsonIgnore()]
-        public string Keywords { get; internal set; }
+        public string? Keywords { get;  set; }
 
         [JsonIgnore()]
-        public string Notes { get; internal set; }
+        public string? Notes { get;  set; }
     }
 
     public class Data
     {
         [JsonProperty("abilityStats")]
-        public List<AbilityStat> AbilityStats { get; set; }
+        public List<AbilityStat> AbilityStats { get; set; } = new List<AbilityStat>();
 
         [JsonProperty("abilityValuations")]
-        public Dictionary<int, double> AbilityValuations { get; set; }
+        public Dictionary<int, double> AbilityValuations { get; set; } = new Dictionary<int, double>();
     }
 
     public class Root
     {
         [JsonProperty("data")]
-        public Data Data { get; set; }
+        public Data? Data { get; set; }
     }
 }

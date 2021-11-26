@@ -20,6 +20,8 @@ using Microsoft.Extensions.DependencyInjection;
 using HGV.Reaver.Factories;
 using DSharpPlus.SlashCommands.EventArgs;
 
+#nullable disable
+
 namespace HGV.Reaver.Hosts
 {
     internal class DiscordLifetimeHost : BackgroundService
@@ -41,6 +43,7 @@ namespace HGV.Reaver.Hosts
             this.client.Ready += this.OnReady;
             this.client.GuildAvailable += this.OnGuildAvailable;
             this.client.ClientErrored += this.OnClientError;
+            this.client.ComponentInteractionCreated += OnComponentInteractionCreated;
             this.client.MessageReactionAdded += OnMessageReactionAdded;
             this.client.MessageReactionRemoved += OnMessageReactionRemoved;
 
@@ -80,7 +83,9 @@ namespace HGV.Reaver.Hosts
             await this.client.UpdateStatusAsync(userStatus: UserStatus.Offline);
             await this.client.DisconnectAsync();
         }
-        
+
+      
+
         private Task OnReady(DiscordClient sender, ReadyEventArgs e)
         {
             // let's log the fact that this event occured
@@ -116,13 +121,52 @@ namespace HGV.Reaver.Hosts
             return Task.CompletedTask;
         }
 
+        private async Task OnComponentInteractionCreated(DiscordClient sender, ComponentInteractionCreateEventArgs e)
+        {
+            // let's log the id of the component and user
+            sender.Logger.LogInformation($"{e.User.Username} selected component '{e.Id}'");
+
+            try
+            {
+                switch (e.Id)
+                {
+                    case "3b8a4245-a436-4a69-9b5d-5ff4d198fe20":
+                        {
+                            var embed = e.Message.Embeds.FirstOrDefault();
+                            var team = embed.Fields.Where(_ => _.Name == "TEAM").Select(_ => _.Value).FirstOrDefault();
+                            var id = ulong.Parse(embed.Footer.Text);
+                            var user = await e.Guild.GetMemberAsync(id);
+
+                            var group = e.Channel.Parent is null ? "/" : $"{e.Channel.Parent.Name}/";
+                            var chanel = e.Channel.Name ?? string.Empty;
+                            await user.SendMessageAsync($"{e.User.Username} is requesting to join the {team} team you promoted in {group}{chanel} on the {e.Guild.Name} guild.");
+                        }
+                        break;
+                    case "51290b36-5292-4751-8b82-bbe111c15df8":
+                        {
+                            var embed = e.Message.Embeds.FirstOrDefault();
+                            var id = ulong.Parse(embed.Footer.Text);
+                            if(e.User.Id == id)
+                                await e.Message.DeleteAsync();
+                        } 
+                        break;
+                    default:
+                        break;
+                }
+            }
+            finally
+            {
+                e.Handled = true;
+            }
+        }
+
         private async Task OnMessageReactionAdded(DiscordClient sender, MessageReactionAddEventArgs e)
         {
             try
             {
                 var service = this.services.GetService<IRoleLinkService>();
                 if (service is null)
-                    throw new Exception("Missing an implementation of the IRoleLinkService");
+                    throw new NullReferenceException("Missing an implementation of the IRoleLinkService");
 
                 var link = await service.Get(e.Guild.Id, e.Message.Id, e.Emoji.GetDiscordName());
                 if (link is null)
@@ -156,7 +200,7 @@ namespace HGV.Reaver.Hosts
             {
                 var service = this.services.GetService<IRoleLinkService>();
                 if (service is null)
-                    throw new Exception("Missing an implementation of the IRoleLinkService");
+                    throw new NullReferenceException("Missing an implementation of the IRoleLinkService");
 
                 var link = await service.Get(e.Guild.Id, e.Message.Id, e.Emoji.GetDiscordName());
                 if (link is null)
@@ -218,8 +262,6 @@ namespace HGV.Reaver.Hosts
 
             e.Handled = true;
         }
-
-        
 
         private async Task OnContextMenuErrored(SlashCommandsExtension sender, DSharpPlus.SlashCommands.EventArgs.ContextMenuErrorEventArgs e)
         {

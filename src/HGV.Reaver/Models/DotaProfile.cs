@@ -21,13 +21,13 @@ namespace HGV.Reaver.Models.DotaProfile
     public class DotaProfile
     {
         [JsonProperty("avatar")]
-        public string Avatar { get; set; }
+        public string? Avatar { get; set; }
 
         [JsonProperty("lastMatch")]
         public DateTime? LastMatch { get; set; }
 
         [JsonProperty("nickname")]
-        public string Nickname { get; set; }
+        public string? Nickname { get; set; }
 
         [JsonProperty("overallRank")]
         public int? OverallRank { get; set; }
@@ -39,7 +39,7 @@ namespace HGV.Reaver.Models.DotaProfile
         public double? Rating { get; set; }
 
         [JsonProperty("region")]
-        public string Region { get; set; }
+        public string? Region { get; set; }
 
         [JsonProperty("regionalRank")]
         public int? RegionalRank { get; set; }
@@ -48,12 +48,12 @@ namespace HGV.Reaver.Models.DotaProfile
         public int? AccountId { get; set; }
 
         [JsonProperty("winLoss")]
-        public WinLossData WinLoss { get; set; }
+        public WinLossData? WinLoss { get; set; }
     }
 
     public class Root
     {
         [JsonProperty("data")]
-        public DotaProfile Data { get; set; }
+        public DotaProfile? Data { get; set; }
     }
 }

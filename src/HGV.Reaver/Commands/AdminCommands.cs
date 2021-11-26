@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System;
 
 namespace HGV.Reaver.Commands
 {
@@ -21,7 +22,7 @@ namespace HGV.Reaver.Commands
             var collection = new List<DiscordApplicationCommandOptionChoice>();
 
             
-            var factory = this.Services.GetService<IDiscordClientFactory>();
+            var factory = this.Services.GetService<IDiscordClientFactory>() ?? throw new NullReferenceException("CommandChoiceProvider::Provider::IDiscordClientFactory");
             var commands = await factory.Client.GetGlobalApplicationCommandsAsync();
             var privateCommands = commands.Where(i => i.DefaultPermission == false);
 

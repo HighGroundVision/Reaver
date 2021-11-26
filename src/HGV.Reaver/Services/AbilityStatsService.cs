@@ -4,6 +4,7 @@ using HGV.Reaver.Models;
 using HGV.Reaver.Models.Abilities;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -35,6 +36,9 @@ namespace HGV.Reaver.Services
 
             var json = await this.httpClient.GetStringAsync($"{windrunUrl}/api/abilities");
             var model = JsonConvert.DeserializeObject<Root>(json);
+
+            if (model?.Data is null)
+                throw new NullReferenceException("IAbilityStatsService::GetAbilities::Model");
 
             var collection = model.Data.AbilityStats
                 .Join(model.Data.AbilityValuations, _ => _.AbilityId, _ => _.Key, (lhs, rhs) =>

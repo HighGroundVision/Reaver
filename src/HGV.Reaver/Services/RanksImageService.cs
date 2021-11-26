@@ -12,7 +12,7 @@ namespace HGV.Reaver.Services
 {
     public interface IRanksImageService
     {
-        Task<Uri> StorageImage(ulong streamId);
+        Task<Uri?> StorageImage(ulong streamId);
     }
 
     public class RanksImageService : IRanksImageService
@@ -35,7 +35,7 @@ namespace HGV.Reaver.Services
             this.puppeteerConfuration = new ConnectOptions() { BrowserWSEndpoint = $"wss://chrome.browserless.io?token={token}" };
         }
 
-        public async Task<Uri> StorageImage(ulong streamId)
+        public async Task<Uri?> StorageImage(ulong streamId)
         {
             var browser = await Puppeteer.ConnectAsync(this.puppeteerConfuration);
             try
@@ -61,7 +61,7 @@ namespace HGV.Reaver.Services
                 await client.UploadAsync(stream);
                 return client.Uri;
             }
-            catch(Exception ex)
+            catch(Exception)
             {
                 return null;
             }

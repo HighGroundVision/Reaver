@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+#nullable disable
+
 namespace HGV.Reaver
 {
     public static class ErrorEventArgsExtensions
