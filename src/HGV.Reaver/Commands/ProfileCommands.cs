@@ -82,7 +82,7 @@ namespace HGV.Reaver.Commands
             var rating = dota?.Rating ?? 0;
             var regionalRank = dota?.RegionalRank ?? 0;
             var rRank = regionalRank > 0 ? $"#{regionalRank}" : "N/A";
-            var overallRank = dota?.RegionalRank ?? 0;
+            var overallRank = dota?.OverallRank ?? 0;
             var oRank = overallRank > 0 ? $"#{overallRank}" : "N/A";
 
             builder.AddField("ID", accountId.ToString(), false);
