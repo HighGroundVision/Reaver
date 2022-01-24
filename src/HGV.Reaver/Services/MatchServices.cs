@@ -27,14 +27,14 @@ namespace HGV.Reaver.Services
 
         public async Task<MatchMeta> GetMeta(long matchId)
         {
-            var json = await this.httpClient.GetStringAsync($"{windrunUrl}/api/matches/{matchId}/meta");
+            var json = await this.httpClient.GetStringAsync($"api/matches/{matchId}/meta");
             var model = JsonConvert.DeserializeObject<MatchMeta>(json);
             return model ?? throw new NullReferenceException("IMatchServices::GetMeta::DeserializeObject::MatchMeta");
         }
 
         public async Task<MatchData> GetMatch(long matchId)
         {
-            var json = await this.httpClient.GetStringAsync($"{windrunUrl}/api/matches/{matchId}");
+            var json = await this.httpClient.GetStringAsync($"api/matches/{matchId}");
             var model = JsonConvert.DeserializeObject<MatchReponse>(json);
             return model?.Data ?? throw new NullReferenceException("IMatchServices::GetMatch::DeserializeObject::MatchMeta"); ;
         }

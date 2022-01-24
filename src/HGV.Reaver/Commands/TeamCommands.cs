@@ -16,8 +16,7 @@ namespace HGV.Reaver.Commands
     public class TeamCommands : ApplicationCommandModule
     {
         private const string DEFAULT_IMAGE_URL = "https://steamuserimages-a.akamaihd.net/ugc/868480752636433334/1D2881C5C9B3AD28A1D8852903A8F9E1FF45C2C8/";
-        private const string DEFAULT_IMAGE_WARD = "https://hyperstone.highgroundvision.com/images/wards/observer.png";
-        
+
         private readonly IAccountService accountService;
         private readonly IProfileService profileService;
 
@@ -39,6 +38,9 @@ namespace HGV.Reaver.Commands
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder());
 
             var link = await this.accountService.Get(ctx.Guild.Id, ctx.Member.Id);
+            if (link is null)
+                throw new AccountNotLinkedException();
+
             var profile = await this.profileService.GetDotaProfile(link.SteamId);
             if (profile is null)
                 throw new NullReferenceException("TeamCommands::Promote::GetDotaProfile");

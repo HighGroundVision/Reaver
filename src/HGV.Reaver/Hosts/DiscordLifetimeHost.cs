@@ -5,20 +5,16 @@ using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using HGV.Reaver.Commands;
-using HGV.Reaver.Models;
+using HGV.Reaver.Factories;
 using HGV.Reaver.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using HGV.Reaver.Factories;
-using DSharpPlus.SlashCommands.EventArgs;
 
 #nullable disable
 
@@ -60,7 +56,6 @@ namespace HGV.Reaver.Hosts
             commands.RegisterCommands<AdminCommands>();
             commands.RegisterCommands<SelfServiceCommand>();
             commands.RegisterCommands<TeamCommands>();
-            //commands.RegisterCommands<LeagueCommands>();
             commands.RegisterCommands<AccountCommands>();
             commands.RegisterCommands<ProfileCommands>();
             commands.RegisterCommands<MatchCommands>();
@@ -96,7 +91,8 @@ namespace HGV.Reaver.Hosts
         private Task OnGuildAvailable(DiscordClient sender, GuildCreateEventArgs e)
         {
             // let's log the name of the guild that was just sent to our client
-            sender.Logger.LogInformation($"Guild available: {e.Guild.Name}");
+            string message = $"Guild available: {e.Guild.Name}";
+            sender.Logger.LogInformation(message);
             return Task.CompletedTask;
         }
 
@@ -110,21 +106,24 @@ namespace HGV.Reaver.Hosts
         private Task OnSlashCommandExecuted(SlashCommandsExtension sender, DSharpPlus.SlashCommands.EventArgs.SlashCommandExecutedEventArgs e)
         {
             // let's log the name of the command and user
-            e.Context.Client.Logger.LogInformation($"{e.Context.User.Username} executed '{e.Context.CommandName}'");
+            string message = $"{e.Context.User.Username} executed '{e.Context.CommandName}'";
+            e.Context.Client.Logger.LogInformation(message);
             return Task.CompletedTask;
         }
 
         private Task OnContextMenuExecuted(SlashCommandsExtension sender, DSharpPlus.SlashCommands.EventArgs.ContextMenuExecutedEventArgs e)
         {
             // let's log the name of the command and user
-            e.Context.Client.Logger.LogInformation($"{e.Context.User.Username} executed '{e.Context.CommandName}'");
+            string message = $"{e.Context.User.Username} executed '{e.Context.CommandName}'";
+            e.Context.Client.Logger.LogInformation(message);
             return Task.CompletedTask;
         }
 
         private async Task OnComponentInteractionCreated(DiscordClient sender, ComponentInteractionCreateEventArgs e)
         {
             // let's log the id of the component and user
-            sender.Logger.LogInformation($"{e.User.Username} selected component '{e.Id}'");
+            string message = $"{e.User.Username} selected component '{e.Id}'";
+            sender.Logger.LogInformation(message);
 
             try
             {
@@ -132,7 +131,7 @@ namespace HGV.Reaver.Hosts
                 {
                     case "3b8a4245-a436-4a69-9b5d-5ff4d198fe20":
                         {
-                            var embed = e.Message.Embeds.FirstOrDefault();
+                            var embed = e.Message.Embeds.ElementAtOrDefault(0);
                             var team = embed.Fields.Where(_ => _.Name == "TEAM").Select(_ => _.Value).FirstOrDefault();
                             var id = ulong.Parse(embed.Footer.Text);
                             var user = await e.Guild.GetMemberAsync(id);
@@ -144,7 +143,7 @@ namespace HGV.Reaver.Hosts
                         break;
                     case "51290b36-5292-4751-8b82-bbe111c15df8":
                         {
-                            var embed = e.Message.Embeds.FirstOrDefault();
+                            var embed = e.Message.Embeds.ElementAtOrDefault(0);
                             var id = ulong.Parse(embed.Footer.Text);
                             if(e.User.Id == id)
                                 await e.Message.DeleteAsync();
@@ -182,11 +181,13 @@ namespace HGV.Reaver.Hosts
 
                 await user.GrantRoleAsync(role);
 
-                sender.Logger.LogInformation($"{e.User.Username} added a role {role.Name}");
+                string message = $"{e.User.Username} added a role {role.Name}";
+                sender.Logger.LogInformation(message);
             }
             catch(Exception ex)
             {
-                sender.Logger.LogError(ex, $"{e.User.Username} had and error with self service {e.Message.Id} in {e.Channel.Name} by {e.Emoji.GetDiscordName()}");
+                string message = $"{e.User.Username} had and error with self service {e.Message.Id} in {e.Channel.Name} by {e.Emoji.GetDiscordName()}";
+                sender.Logger.LogError(ex, message);
             }
             finally
             {
@@ -216,11 +217,13 @@ namespace HGV.Reaver.Hosts
 
                 await user.RevokeRoleAsync(role);
 
-                sender.Logger.LogInformation($"{e.User.Username} removed a role {role.Name}");
+                string message = $"{e.User.Username} removed a role {role.Name}";
+                sender.Logger.LogInformation(message);
             }
             catch (Exception ex)
             {
-                sender.Logger.LogError(ex, $"{e.User.Username} had and error with self service {e.Message.Id} in {e.Channel.Name} by {e.Emoji.GetDiscordName()}");
+                string message = $"{e.User.Username} had and error with self service {e.Message.Id} in {e.Channel.Name} by {e.Emoji.GetDiscordName()}";
+                sender.Logger.LogError(ex, message: message);
             }
             finally
             {
@@ -241,7 +244,7 @@ namespace HGV.Reaver.Hosts
             var buidler = new DiscordWebhookBuilder();
             var embed = new DiscordEmbedBuilder() { Color = DiscordColor.Red };
 
-            if (e.Exception is SlashExecutionChecksFailedException ex)
+            if (e.Exception is SlashExecutionChecksFailedException)
             {
                 embed.WithTitle($"{no_entry} Access denied").WithDescription($"You do not have the permissions required to execute this command.");
             }
@@ -255,7 +258,7 @@ namespace HGV.Reaver.Hosts
             }
             else
             {
-                embed.WithTitle($"Error").WithDescription($"{bug} Yes that is a bug an we have logged the issue. Some errors happen and you can try again but if your repeatedly doing same action expceting a diferent result welcome to insanity.");
+                embed.WithTitle($"{bug} On Snap! What is that?").WithDescription($"Yes that is a bug and we have logged the issue. Some errors happen and you can try again but if your repeatedly doing same action expceting a diferent result welcome to insanity.");
             }
 
             await e.Context.EditResponseAsync(buidler.AddEmbed(embed));
@@ -275,7 +278,7 @@ namespace HGV.Reaver.Hosts
             var buidler = new DiscordWebhookBuilder();
             var embed = new DiscordEmbedBuilder() { Color = DiscordColor.Red };
 
-            if (e.Exception is ContextMenuExecutionChecksFailedException ex)
+            if (e.Exception is ContextMenuExecutionChecksFailedException)
             {
                 embed.WithTitle($"{no_entry} Access denied").WithDescription($"You do not have the permissions required to execute this command.");
             }

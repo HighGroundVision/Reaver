@@ -97,18 +97,24 @@ namespace HGV.Reaver.Commands
             var meta = await this.matchServices.GetMeta(matchId);
             if (meta.Status == MatchMetaStatus.OK && meta.State == MatchMetaStatus.Parsed)
             {
+                {
+                    var builder = new DiscordEmbedBuilder();
+                    builder.WithTitle($"{matchId}")
+                        .WithDescription("With idiots like these in charge of recording it make take a minute. We will update this message and ping you when the video is ready.")
+                        .WithUrl($"{windrunUrl}matches/{matchId}")
+                        .WithImageUrl("https://i.imgur.com/WhAjDPV.jpg");
+                    
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(builder));
+                }
+
                 var match = await this.matchServices.GetMatch(matchId);
                 var url = await this.draftImageService.StorageMatcDraftAnimation(matchId);
 
-                var builder = new DiscordEmbedBuilder()
-                    .WithTitle($"{match.MatchId}")
-                    .WithUrl($"{windrunUrl}/matches/{match.MatchId}")
-                    .WithColor(DiscordColor.Purple);
-
-                if (url is not null)
-                    builder.WithImageUrl(url);
-
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(builder));
+                {
+                    var builder = new DiscordWebhookBuilder();
+                    builder.WithContent($"{ctx.Member.Mention} the video of the draft for match {match.MatchId} is ready. {Environment.NewLine} {url}");                 
+                    await ctx.EditResponseAsync(builder);
+                }
             }
             else
             {

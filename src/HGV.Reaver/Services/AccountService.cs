@@ -9,7 +9,7 @@ namespace HGV.Reaver.Services
     {
         Task Add(UserLinkEntity user);
         Task Remove(ulong GuildId, ulong UserId);
-        Task<UserLinkEntity> Get(ulong GuildId, ulong UserId);
+        Task<UserLinkEntity?> Get(ulong GuildId, ulong UserId);
     }
 
     public class AccountService : IAccountService
@@ -44,7 +44,7 @@ namespace HGV.Reaver.Services
             await this.context.SaveChangesAsync();
         }
 
-        public async Task<UserLinkEntity> Get(ulong GuildId, ulong UserId)
+        public async Task<UserLinkEntity?> Get(ulong GuildId, ulong UserId)
         {
             var entity = await this.context.UserLinks.Where(i => i.GuidId == GuildId && i.UserId == UserId).FirstOrDefaultAsync();
             return entity;

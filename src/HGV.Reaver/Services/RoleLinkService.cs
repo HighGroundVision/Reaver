@@ -10,7 +10,7 @@ namespace HGV.Reaver.Services
     public interface IRoleLinkService
     {
         Task Add(RoleLinkEntity item);
-        Task<RoleLinkEntity> Get(ulong guidId, ulong messageId, string emojiName);
+        Task<RoleLinkEntity?> Get(ulong guidId, ulong messageId, string emojiName);
         Task Remove(ulong guidId, ulong messageId);
         Task Remove(ulong guidId, ulong messageId, string emojiName);
         Task Purge(ulong guidId);
@@ -53,7 +53,7 @@ namespace HGV.Reaver.Services
             await this.context.SaveChangesAsync();
         }
 
-        public async Task<RoleLinkEntity> Get(ulong guidId, ulong messageId, string emojiName)
+        public async Task<RoleLinkEntity?> Get(ulong guidId, ulong messageId, string emojiName)
         {
             var entity = await this.context.RoleLinks.Where(i => i.GuidId == guidId && i.MessageId == messageId && i.EmojiName == emojiName).FirstOrDefaultAsync();
             return entity;

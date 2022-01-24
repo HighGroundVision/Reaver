@@ -34,11 +34,9 @@ namespace HGV.Reaver.Services
         {
             var abilities = this.metaClient.GetAbilities();
 
-            var json = await this.httpClient.GetStringAsync($"{windrunUrl}/api/abilities");
-            var model = JsonConvert.DeserializeObject<Root>(json);
-
-            if (model?.Data is null)
-                throw new NullReferenceException("IAbilityStatsService::GetAbilities::Model");
+            var json = await this.httpClient.GetStringAsync($"api/abilities");
+            var model = JsonConvert.DeserializeObject<Root>(json) ?? throw new InvalidOperationException("IAbilityStatsService::GetAbilities::Model");
+            var data = model.Data ?? throw new InvalidOperationException("IAbilityStatsService::GetAbilities::Model::Data");
 
             var collection = model.Data.AbilityStats
                 .Join(model.Data.AbilityValuations, _ => _.AbilityId, _ => _.Key, (lhs, rhs) =>

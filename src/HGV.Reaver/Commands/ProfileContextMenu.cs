@@ -29,6 +29,9 @@ namespace HGV.Reaver.Commands
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder() { IsEphemeral = true });
 
             var account = await this.accountService.Get(ctx.Member.Guild.Id, ctx.TargetMember.Id);
+            if (account is null)
+                throw new AccountNotLinkedException();
+
             var dota = await this.profileService.GetDotaProfile(account.SteamId);
             var steam = await this.profileService.GetSteamProfile(account.SteamId);
 

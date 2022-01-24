@@ -1,24 +1,25 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <UserSecretsId>aspnet-HGV.Reaver-CA5A2CA4-97B6-4F9D-A40D-F87F2FAE9882</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AspNet.Security.OAuth.Discord" Version="5.0.16" />
-    <PackageReference Include="AspNet.Security.OpenId.Steam" Version="5.0.0" />
+    <PackageReference Include="AspNet.Security.OAuth.Discord" Version="6.0.2" />
+    <PackageReference Include="AspNet.Security.OpenId.Steam" Version="6.0.0" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.10.0" />
-    <PackageReference Include="DSharpPlus" Version="4.2.0-nightly-01044" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.2.0-nightly-01044" />
-    <PackageReference Include="DSharpPlus.SlashCommands" Version="4.2.0-nightly-01044" />
-    <PackageReference Include="HGV.Basilius" Version="7.30.5" />
-    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="8.3.3" />
-    <PackageReference Include="Magick.NET.Core" Version="8.3.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="5.0.11" />
-    <PackageReference Include="Polly" Version="7.2.2" />
-    <PackageReference Include="PuppeteerSharp" Version="5.1.0" />
+    <PackageReference Include="DSharpPlus" Version="4.2.0-nightly-01062" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01062" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.2.0-nightly-01062" />
+    <PackageReference Include="DSharpPlus.SlashCommands" Version="4.2.0-nightly-01062" />
+    <PackageReference Include="HGV.Basilius" Version="7.30.6" />
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="8.6.1" />
+    <PackageReference Include="Magick.NET.Core" Version="8.6.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="6.0.1" />
+    <PackageReference Include="Polly" Version="7.2.3" />
+    <PackageReference Include="PuppeteerSharp" Version="6.1.0" />
   </ItemGroup>
 
 

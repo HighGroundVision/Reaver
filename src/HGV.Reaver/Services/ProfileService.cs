@@ -29,7 +29,7 @@ namespace HGV.Reaver.Services
 
         public async Task<HGV.Reaver.Models.DotaProfile.DotaProfile?> GetDotaProfile(ulong steamId)
         {
-            var json = await this.httpClient.GetStringAsync($"{windrunUrl}/api/players/{steamId}");
+            var json = await this.httpClient.GetStringAsync($"api/players/{steamId}");
             var model = JsonConvert.DeserializeObject<HGV.Reaver.Models.DotaProfile.Root>(json);
             if (model?.Data?.AccountId is null)
                 return null;

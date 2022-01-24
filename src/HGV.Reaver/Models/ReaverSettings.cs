@@ -17,6 +17,8 @@ namespace HGV.Reaver.Models
         public string? StorageConnectionString { get; set; }
         public string? CosmosConnectionString { get; set; }
         public string? BrowserlessToken { get; set; }
-        
+        public string? ShotstackUrl { get; set; }
+        public string? ShotstackToken { get; set; }
+
     }
 }

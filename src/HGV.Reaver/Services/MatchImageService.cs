@@ -5,8 +5,10 @@ using ImageMagick;
 using Microsoft.Extensions.Options;
 using PuppeteerSharp;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace HGV.Reaver.Services
@@ -21,18 +23,22 @@ namespace HGV.Reaver.Services
     public class MatchImageService : IMatchImageService
     {
         private const string CONTAINER_NAME = "temp";
+        private List<string> STATUS = new List<string>() { "done", "failed", };
 
         private readonly string windrunUrl;
         private readonly string connectionString;
         private readonly ConnectOptions puppeteerConfuration;
+        private readonly IShotstackService shotstackService;
 
-        public MatchImageService(IOptions<ReaverSettings> settings)
+        public MatchImageService(IOptions<ReaverSettings> settings, IShotstackService shotstackService)
         {
             this.windrunUrl = settings?.Value?.WindrunUrl ?? throw new ConfigurationValueMissingException(nameof(ReaverSettings.WindrunUrl));
             this.connectionString = settings?.Value?.StorageConnectionString ?? throw new ConfigurationValueMissingException(nameof(ReaverSettings.StorageConnectionString));
 
             var token = settings?.Value?.BrowserlessToken ?? throw new ConfigurationValueMissingException(nameof(ReaverSettings.BrowserlessToken));
             this.puppeteerConfuration = new ConnectOptions() { BrowserWSEndpoint = $"wss://chrome.browserless.io?token={token}" };
+
+            this.shotstackService = shotstackService;
         }
 
         public async Task<Uri> StorageMatchSummaryImage(long matchId)
@@ -41,17 +47,9 @@ namespace HGV.Reaver.Services
             var options = new ViewPortOptions { Width = 755, Height = 720 };
             var image = await GetImage(matchId, 0, selector, options);
 
-            using var stream = new MemoryStream();
-            await image.WriteAsync(stream, MagickFormat.Png);
-            stream.Seek(0, SeekOrigin.Begin);
-
-            image.Dispose();
-
             var key = Guid.NewGuid();
             var client = new BlobClient(this.connectionString, CONTAINER_NAME, $"{key}.png");
-            await client.UploadAsync(stream);
-
-            await stream.DisposeAsync();
+            await client.UploadAsync(image);
 
             return client.Uri;
         }
@@ -62,48 +60,90 @@ namespace HGV.Reaver.Services
             var options = new ViewPortOptions { Width = 1280, Height = 720 };
             var image = await GetImage(matchId, 0, selector, options);
 
-            using var stream = new MemoryStream();
-            await image.WriteAsync(stream, MagickFormat.Png);
-            stream.Seek(0, SeekOrigin.Begin);
-
-            image.Dispose();
-
             var key = Guid.NewGuid();
             var client = new BlobClient(this.connectionString, CONTAINER_NAME, $"{key}.png");
-            await client.UploadAsync(stream);
-            
-            await stream.DisposeAsync();
+            await client.UploadAsync(image);
 
             return client.Uri;
         }
 
         public async Task<Uri> StorageMatcDraftAnimation(long matchId)
         {
+            try
+            {
+                var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
+                var imagesUrls = await GetScreenshots(matchId, cts.Token);
+                var tmpMovieUrl = await RenderMovice(imagesUrls, cts.Token);
+                var bloblMovieUrl = await StorageMoive(tmpMovieUrl, cts.Token);
+                return bloblMovieUrl;
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw new UserFriendlyException("The screenshot collection, movie rendering and/or storaging process took too long and was canceled.", ex);
+            }
+        }
+
+        private async Task<Uri> StorageMoive(Uri tmpMovieUrl, CancellationToken ct)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            var key = Guid.NewGuid();
+            var moiveBlob = new BlobClient(this.connectionString, CONTAINER_NAME, $"{key}.mp4");
+            var copyOpteration = await moiveBlob.StartCopyFromUriAsync(tmpMovieUrl);
+            await copyOpteration.WaitForCompletionAsync(ct);
+            return moiveBlob.Uri;
+        }
+
+        private async Task<Uri> RenderMovice(IEnumerable<Uri> images, CancellationToken ct)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            var renderOpteration = await this.shotstackService.Render(images);
+            var result = await renderOpteration.WaitForCompletion(ct);
+            if (result is null)
+                throw new InvalidOperationException("The Render Opteration Did Not Return a Value");
+
+            return result.Url;
+        }
+
+        private async Task<IEnumerable<Uri>> GetScreenshots(long matchId, CancellationToken ct)
+        {
+            var collection = new List<Uri>();
+
             var selector = ".draft_replay_body";
-            var options = new ViewPortOptions { Width = 1280, Height = 720 };
-
-            var collection = new MagickImageCollection();
-
+            var viewPortOptions = new ViewPortOptions 
+            { 
+                Width = 1280, 
+                Height = 768 
+            };
+            var screenshotOptions = new ScreenshotOptions() 
+            { 
+                Type = ScreenshotType.Png,
+                BurstMode = true,
+                OmitBackground = false,
+            };
             var browser = await Puppeteer.ConnectAsync(this.puppeteerConfuration);
             try
             {
                 var page = await browser.NewPageAsync();
                 page.DefaultNavigationTimeout = 0;
 
-                await page.SetViewportAsync(options);
+                await page.SetViewportAsync(viewPortOptions);
                 await page.GoToAsync($"{windrunUrl}/matches/{matchId}");
                 await page.WaitForSelectorAsync(selector);
 
                 for (int i = 0; i < 40; i++)
                 {
-                    var element = await page.QuerySelectorAsync(selector);
-                    var data = await element.ScreenshotDataAsync(new ScreenshotOptions() { Type = ScreenshotType.Png });
-                    await element.DisposeAsync();
+                    ct.ThrowIfCancellationRequested();
 
-                    var image = new MagickImage(data) { AnimationDelay = 25 };
-                    image.Resize(new Percentage(50));
-                    collection.Add(image);
+                    var key = Guid.NewGuid();
+                    var imageBlob = new BlobClient(this.connectionString, CONTAINER_NAME, $"{key}.png");
+                    await imageBlob.DeleteIfExistsAsync();
+                    collection.Add(imageBlob.Uri);
 
+                    await using var element = await page.QuerySelectorAsync(selector);
+                    await using var stream = await element.ScreenshotStreamAsync(screenshotOptions);
+                    await imageBlob.UploadAsync(stream);
                     await page.ClickAsync(".next_step ");
                 }
 
@@ -115,21 +155,11 @@ namespace HGV.Reaver.Services
                 await browser.DisposeAsync();
             }
 
-            using var stream = new MemoryStream();
-            await collection.WriteAsync(stream, MagickFormat.Gif);
-            stream.Seek(0, SeekOrigin.Begin);
-
-            collection.Dispose();
-
-            var key = Guid.NewGuid();
-            var client = new BlobClient(this.connectionString, CONTAINER_NAME, $"{key}.gif");
-            await client.UploadAsync(stream);
-            await stream.DisposeAsync();
-
-            return client.Uri;
+            return collection;
         }
 
-        private async Task<MagickImage> GetImage(long matchId, int step, string selector, ViewPortOptions options)
+
+        private async Task<Stream> GetImage(long matchId, int step, string selector, ViewPortOptions options)
         {
             var browser = await Puppeteer.ConnectAsync(this.puppeteerConfuration);
             try
@@ -142,13 +172,11 @@ namespace HGV.Reaver.Services
                 await page.WaitForSelectorAsync(selector);
 
                 var element = await page.QuerySelectorAsync(selector);
-                var data = await element.ScreenshotDataAsync(new ScreenshotOptions() { Type = ScreenshotType.Png });
+                var stream = await element.ScreenshotStreamAsync(new ScreenshotOptions() { Type = ScreenshotType.Png });
                 await element.DisposeAsync();
                 await page.DisposeAsync();
 
-                var image = new MagickImage(data) { AnimationDelay = 25 };
-                image.Resize(new Percentage(50));
-                return image;
+                return stream;
             }
             finally
             {

@@ -19,12 +19,14 @@ namespace HGV.Reaver.Commands
         private readonly IAccountService accountService;
         private readonly IProfileService profileService;
         private readonly IRanksImageService ranksImageService;
+        private readonly string windrunUrl;
 
-        public ProfileCommands(IAccountService accountService, IProfileService profileService, IRanksImageService RanksImageService)
+        public ProfileCommands(IAccountService accountService, IProfileService profileService, IRanksImageService RanksImageService, IOptions<ReaverSettings> settings)
         {
             this.accountService = accountService;
             this.profileService = profileService;
             this.ranksImageService = RanksImageService;
+            this.windrunUrl = settings?.Value?.WindrunUrl ?? throw new ArgumentNullException("ReaverSettings::WindrunUrl");
         }
 
         [SlashCommand("Card", "Profile Summary")]
@@ -54,11 +56,11 @@ namespace HGV.Reaver.Commands
             await  CreateMessage(ctx, dota, steam, url);
         }
 
-        private static async Task CreateMessage(InteractionContext ctx, Models.DotaProfile.DotaProfile dota, Models.SteamProfile.SteamProfile steam, Uri? url)
+        private async Task CreateMessage(InteractionContext ctx, Models.DotaProfile.DotaProfile dota, Models.SteamProfile.SteamProfile steam, Uri? url)
         {
             var builder = new DiscordEmbedBuilder()
                 .WithTitle(steam.Persona)
-                .WithUrl(steam.ProfileUrl)
+                .WithUrl($"{this.windrunUrl}/players/{dota.AccountId}")
                 .WithThumbnail(steam.AvatarLarge)
                 .WithColor(DiscordColor.Purple);
 
