@@ -21,8 +21,8 @@ namespace HGV.Reaver.Commands
         {
             var collection = new List<DiscordApplicationCommandOptionChoice>();
 
-            
-            var factory = this.Services.GetService<IDiscordClientFactory>() ?? throw new NullReferenceException("CommandChoiceProvider::Provider::IDiscordClientFactory");
+            var factory = this.Services.GetService<IDiscordClientFactory>() ?? throw new NullReferenceException(nameof(IDiscordClientFactory));
+            //var _commands = await factory.Client.GetGuildApplicationCommandsAsync(this.GuildId.Value);
             var commands = await factory.Client.GetGlobalApplicationCommandsAsync();
             var privateCommands = commands.Where(i => i.DefaultPermission == false);
 

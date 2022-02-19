@@ -60,7 +60,9 @@ namespace HGV.Reaver.Hosts
             commands.RegisterCommands<ProfileCommands>();
             commands.RegisterCommands<MatchCommands>();
             commands.RegisterCommands<AbilityCommands>();
+            commands.RegisterCommands<LobbyCommand>();
             commands.RegisterCommands<ProfileContextMenu>();
+            
 
             var interactivityConfiguration = new InteractivityConfiguration()
             {

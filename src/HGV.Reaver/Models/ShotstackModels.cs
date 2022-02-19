@@ -7,10 +7,10 @@ namespace HGV.Reaver.Models
     public class Soundtrack
     {
         [JsonProperty("src")]
-        public string Src { get; set; }
+        public string Src { get; set; } = String.Empty;
 
         [JsonProperty("effect")]
-        public string Effect { get; set; }
+        public string Effect { get; set; } = String.Empty;
 
         [JsonProperty("volume")]
         public int Volume { get; set; }
@@ -19,7 +19,7 @@ namespace HGV.Reaver.Models
     public class Font
     {
         [JsonProperty("src")]
-        public string Src { get; set; }
+        public string Src { get; set; } = String.Empty;
     }
 
     public class Crop
@@ -40,10 +40,10 @@ namespace HGV.Reaver.Models
     public class Asset
     {
         [JsonProperty("type")]
-        public string Type { get; set; }
+        public string Type { get; set; } = String.Empty;
 
         [JsonProperty("src")]
-        public string Src { get; set; }
+        public string Src { get; set; } = String.Empty;
     }
 
     public class ImageAsset : Asset
@@ -72,10 +72,10 @@ namespace HGV.Reaver.Models
     public class Transition
     {
         [JsonProperty("in")]
-        public string In { get; set; }
+        public string In { get; set; } = string.Empty;
 
         [JsonProperty("out")]
-        public string Out { get; set; }
+        public string Out { get; set; } = string.Empty;
     }
 
     public class Rotate
@@ -105,19 +105,19 @@ namespace HGV.Reaver.Models
     public class Transform
     {
         [JsonProperty("rotate")]
-        public Rotate Rotate { get; set; }
+        public Rotate Rotate { get; set; } = new Rotate();
 
         [JsonProperty("skew")]
-        public Skew Skew { get; set; }
+        public Skew Skew { get; set; } = new Skew();
 
         [JsonProperty("flip")]
-        public Flip Flip { get; set; }
+        public Flip Flip { get; set; } = new Flip();
     }
 
     public class Clip
     {
         [JsonProperty("asset")]
-        public Asset Asset { get; set; }
+        public Asset Asset { get; set; } = new Asset();
 
         [JsonProperty("start")]
         public double Start { get; set; }
@@ -126,52 +126,52 @@ namespace HGV.Reaver.Models
         public double Length { get; set; }
 
         [JsonProperty("fit")]
-        public string Fit { get; set; }
+        public string Fit { get; set; } = string.Empty;
 
         [JsonProperty("scale")]
         public int Scale { get; set; }
 
         [JsonProperty("position")]
-        public string Position { get; set; }
+        public string Position { get; set; } = string.Empty;
 
         [JsonProperty("offset")]
-        public Offset Offset { get; set; }
+        public Offset Offset { get; set; } = new Offset();
 
         [JsonProperty("transition")]
-        public Transition Transition { get; set; }
+        public Transition Transition { get; set; } = new Transition();
 
         [JsonProperty("effect")]
-        public string Effect { get; set; }
+        public string Effect { get; set; } = string.Empty;
 
         [JsonProperty("filter")]
-        public string Filter { get; set; }
+        public string Filter { get; set; } = string.Empty;
 
         [JsonProperty("opacity")]
         public int Opacity { get; set; }
 
         [JsonProperty("transform")]
-        public Transform Transform { get; set; }
+        public Transform Transform { get; set; } = new Transform();
     }
 
     public class Track
     {
         [JsonProperty("clips")]
-        public List<Clip> Clips { get; set; }
+        public List<Clip> Clips { get; set; } = new List<Clip>();
     }
 
     public class Timeline
     {
         [JsonProperty("soundtrack")]
-        public Soundtrack Soundtrack { get; set; }
+        public Soundtrack Soundtrack { get; set; } = new Soundtrack();
 
         [JsonProperty("background")]
-        public string Background { get; set; }
+        public string Background { get; set; } = String.Empty;
 
         [JsonProperty("fonts")]
-        public List<Font> Fonts { get; set; }
+        public List<Font> Fonts { get; set; } = new List<Font>();
 
         [JsonProperty("tracks")]
-        public List<Track> Tracks { get; set; }
+        public List<Track> Tracks { get; set; } = new List<Track>();
 
         [JsonProperty("cache")]
         public bool Cache { get; set; }
@@ -213,7 +213,7 @@ namespace HGV.Reaver.Models
     public class Destination
     {
         [JsonProperty("provider")]
-        public string Provider { get; set; }
+        public string Provider { get; set; } = String.Empty;
 
         [JsonProperty("exclude")]
         public bool Exclude { get; set; }
@@ -222,67 +222,67 @@ namespace HGV.Reaver.Models
     public class Output
     {
         [JsonProperty("format")]
-        public string Format { get; set; }
+        public string Format { get; set; } = String.Empty;
 
         [JsonProperty("resolution")]
-        public string Resolution { get; set; }
+        public string Resolution { get; set; } = String.Empty;
 
         [JsonProperty("aspectRatio")]
-        public string AspectRatio { get; set; }
+        public string AspectRatio { get; set; } = String.Empty;
 
         [JsonProperty("size")]
-        public Size Size { get; set; }
+        public Size Size { get; set; } = new Size();
 
         [JsonProperty("fps")]
         public int Fps { get; set; }
 
         [JsonProperty("scaleTo")]
-        public string ScaleTo { get; set; }
+        public string ScaleTo { get; set; } = String.Empty;
 
         [JsonProperty("quality")]
-        public string Quality { get; set; }
+        public string Quality { get; set; } = String.Empty;
 
         [JsonProperty("repeat")]
         public bool Repeat { get; set; }
 
         [JsonProperty("range")]
-        public Range Range { get; set; }
+        public Range Range { get; set; } = new Range();
 
         [JsonProperty("poster")]
-        public Poster Poster { get; set; }
+        public Poster Poster { get; set; } = new Poster();
 
         [JsonProperty("thumbnail")]
-        public Thumbnail Thumbnail { get; set; }
+        public Thumbnail Thumbnail { get; set; } = new Thumbnail();
 
         [JsonProperty("destinations")]
-        public List<Destination> Destinations { get; set; }
+        public List<Destination> Destinations { get; set; } = new List<Destination>();
     }
 
     public class Merge
     {
         [JsonProperty("find")]
-        public string Find { get; set; }
+        public string Find { get; set; } = String.Empty;
 
         [JsonProperty("replace")]
-        public string Replace { get; set; }
+        public string Replace { get; set; } = String.Empty;
     }
 
     public class Edit
     {
         [JsonProperty("timeline")]
-        public Timeline Timeline { get; set; }
+        public Timeline Timeline { get; set; } = new Timeline();
 
         [JsonProperty("output")]
-        public Output Output { get; set; }
+        public Output Output { get; set; } = new Output();
 
         [JsonProperty("merge")]
-        public List<Merge> Merge { get; set; }
+        public List<Merge> Merge { get; set; } = new List<Merge>();
 
         [JsonProperty("callback")]
-        public string Callback { get; set; }
+        public string Callback { get; set; } = String.Empty;
 
         [JsonProperty("disk")]
-        public string Disk { get; set; }
+        public string Disk { get; set; } = String.Empty;
     }
 
     public class Queued
@@ -291,17 +291,17 @@ namespace HGV.Reaver.Models
         public bool Success { get; set; }
 
         [JsonProperty("message")]
-        public string Message { get; set; }
+        public string Message { get; set; } = String.Empty;
 
         [JsonProperty("response")]
-        public QueuedResponse Response { get; set; }
+        public QueuedResponse Response { get; set; } = new QueuedResponse();
     }
 
     public class QueuedResponse
     {
         [JsonProperty("message")]
-        public string Message { get; set; }
-        
+        public string Message { get; set; } = string.Empty;
+
         [JsonProperty("id")]
         public Guid Id { get; set; }
     }
@@ -312,29 +312,29 @@ namespace HGV.Reaver.Models
         public bool Success { get; set; }
 
         [JsonProperty("message")]
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
 
         [JsonProperty("response")]
-        public RenderResponse Response { get; set; }
+        public RenderResponse Response { get; set; } = new RenderResponse();
     }
 
 
     public class RenderResponse
     {
         [JsonProperty("id")]
-        public string Id { get; set; }
+        public string Id { get; set; } = string.Empty;
 
         [JsonProperty("owner")]
-        public string Owner { get; set; }
+        public string Owner { get; set; } = String.Empty;
 
         [JsonProperty("plan")]
-        public string Plan { get; set; }
+        public string Plan { get; set; } = String.Empty;
 
         [JsonProperty("status")]
-        public string Status { get; set; }
+        public string Status { get; set; } = String.Empty;
 
         [JsonProperty("error")]
-        public string Error { get; set; }
+        public string Error { get; set; } = String.Empty;
 
         [JsonProperty("duration")]
         public double Duration { get; set; }
@@ -343,13 +343,13 @@ namespace HGV.Reaver.Models
         public double RenderTime { get; set; }
 
         [JsonProperty("url")]
-        public Uri Url { get; set; }
+        public Uri? Url { get; set; }
 
         [JsonProperty("poster")]
-        public Uri Poster { get; set; }
+        public Uri? Poster { get; set; }
 
         [JsonProperty("thumbnail")]
-        public Uri Thumbnail { get; set; }
+        public Uri? Thumbnail { get; set; }
 
         [JsonProperty("created")]
         public DateTime Created { get; set; }

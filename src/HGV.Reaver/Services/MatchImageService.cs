@@ -1,13 +1,10 @@
 ﻿using Azure.Storage.Blobs;
-using HGV.Basilius.Client;
 using HGV.Reaver.Models;
-using ImageMagick;
 using Microsoft.Extensions.Options;
 using PuppeteerSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -100,10 +97,8 @@ namespace HGV.Reaver.Services
 
             var renderOpteration = await this.shotstackService.Render(images);
             var result = await renderOpteration.WaitForCompletion(ct);
-            if (result is null)
-                throw new InvalidOperationException("The Render Opteration Did Not Return a Value");
 
-            return result.Url;
+            return result?.Url ?? throw new InvalidOperationException("The Render Opteration Did Not Return a Value");
         }
 
         private async Task<IEnumerable<Uri>> GetScreenshots(long matchId, CancellationToken ct)

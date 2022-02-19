@@ -2,7 +2,6 @@
 using HGV.Basilius;
 using HGV.Basilius.Client;
 using HGV.Reaver.Models;
-using ImageMagick;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using PuppeteerSharp;

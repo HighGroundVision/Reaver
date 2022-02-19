@@ -2,10 +2,6 @@
 using HGV.Reaver.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace HGV.Reaver.Factories
 {
@@ -34,4 +30,5 @@ namespace HGV.Reaver.Factories
 
         public DiscordClient Client => this.client;
     }
+
 }

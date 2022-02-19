@@ -92,6 +92,7 @@ namespace HGV.Reaver
 
             services.AddTransient<IAccountService, AccountService>();
             services.AddTransient<IRoleLinkService, RoleLinkService>();
+            services.AddTransient<IDotaService, DotaService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
