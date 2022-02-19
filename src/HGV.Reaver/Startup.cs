@@ -81,6 +81,10 @@ namespace HGV.Reaver
                 c.BaseAddress = new Uri(url);
                 c.DefaultRequestHeaders.Add("x-api-key", key);
             });
+            services.AddHttpClient<IHyperstoneService, HyperstoneService>("Hyperstone").ConfigureHttpClient((sp, c) =>
+            {
+                //c.BaseAddress = new Uri("https://hyperstone.highgroundvision.com/");
+            });
 
             services.AddSingleton<IDiscordClientFactory, DiscordClientFactory>();
             services.AddSingleton<IMatchImageService, MatchImageService>();

@@ -127,37 +127,34 @@ namespace HGV.Reaver.Hosts
             string message = $"{e.User.Username} selected component '{e.Id}'";
             sender.Logger.LogInformation(message);
 
-            try
+            switch (e.Id)
             {
-                switch (e.Id)
-                {
-                    case "3b8a4245-a436-4a69-9b5d-5ff4d198fe20":
-                        {
-                            var embed = e.Message.Embeds.ElementAtOrDefault(0);
-                            var team = embed.Fields.Where(_ => _.Name == "TEAM").Select(_ => _.Value).FirstOrDefault();
-                            var id = ulong.Parse(embed.Footer.Text);
-                            var user = await e.Guild.GetMemberAsync(id);
+                case "3b8a4245-a436-4a69-9b5d-5ff4d198fe20":
+                    {
+                        var embed = e.Message.Embeds.ElementAtOrDefault(0);
+                        var team = embed.Fields.Where(_ => _.Name == "TEAM").Select(_ => _.Value).FirstOrDefault();
+                        var id = ulong.Parse(embed.Footer.Text);
+                        var user = await e.Guild.GetMemberAsync(id);
 
-                            var group = e.Channel.Parent is null ? "/" : $"{e.Channel.Parent.Name}/";
-                            var chanel = e.Channel.Name ?? string.Empty;
-                            await user.SendMessageAsync($"{e.User.Username} is requesting to join the {team} team you promoted in {group}{chanel} on the {e.Guild.Name} guild.");
-                        }
-                        break;
-                    case "51290b36-5292-4751-8b82-bbe111c15df8":
-                        {
-                            var embed = e.Message.Embeds.ElementAtOrDefault(0);
-                            var id = ulong.Parse(embed.Footer.Text);
-                            if(e.User.Id == id)
-                                await e.Message.DeleteAsync();
-                        } 
-                        break;
-                    default:
-                        break;
-                }
-            }
-            finally
-            {
-                e.Handled = true;
+                        var group = e.Channel.Parent is null ? "/" : $"{e.Channel.Parent.Name}/";
+                        var chanel = e.Channel.Name ?? string.Empty;
+                        await user.SendMessageAsync($"{e.User.Username} is requesting to join the {team} team you promoted in {group}{chanel} on the {e.Guild.Name} guild.");
+
+                        e.Handled = true;
+                    }
+                    break;
+                case "51290b36-5292-4751-8b82-bbe111c15df8":
+                    {
+                        var embed = e.Message.Embeds.ElementAtOrDefault(0);
+                        var id = ulong.Parse(embed.Footer.Text);
+                        if (e.User.Id == id)
+                            await e.Message.DeleteAsync();
+
+                        e.Handled = true;
+                    }
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -185,15 +182,13 @@ namespace HGV.Reaver.Hosts
 
                 string message = $"{e.User.Username} added a role {role.Name}";
                 sender.Logger.LogInformation(message);
+
+                e.Handled = true;
             }
             catch(Exception ex)
             {
                 string message = $"{e.User.Username} had and error with self service {e.Message.Id} in {e.Channel.Name} by {e.Emoji.GetDiscordName()}";
                 sender.Logger.LogError(ex, message);
-            }
-            finally
-            {
-                e.Handled = true;
             }
         }
 
@@ -221,18 +216,15 @@ namespace HGV.Reaver.Hosts
 
                 string message = $"{e.User.Username} removed a role {role.Name}";
                 sender.Logger.LogInformation(message);
+
+                e.Handled = true;
             }
             catch (Exception ex)
             {
                 string message = $"{e.User.Username} had and error with self service {e.Message.Id} in {e.Channel.Name} by {e.Emoji.GetDiscordName()}";
                 sender.Logger.LogError(ex, message: message);
             }
-            finally
-            {
-                e.Handled = true;
-            }
         }
-
 
         private async Task OnSlashCommandErrored(SlashCommandsExtension sender, DSharpPlus.SlashCommands.EventArgs.SlashCommandErrorEventArgs e)
         {
