@@ -161,29 +161,42 @@ namespace HGV.Reaver.Commands
                     return;
                 }
 
+                var reasons = new StringBuilder();
                 var players = new List<ulong>();
+
                 foreach (var user in users)
                 {
                     // Find linked Account
                     var link = await accountService.Get(ctx.Guild.Id, user.Id);
                     if (link is null)
-                        continue; // "You do not have an account linked. Plese run the '/account link' command."
+                    {
+                        reasons.AppendLine($"{user.Mention} your account is not linked. Plese run the '/account link' command.");
+                        continue;
+                    }
 
                     // Get Dota profile
                     var profile = await profileService.GetDotaProfile(link.SteamId);
                     if (profile is null)
+                    {
+                        reasons.AppendLine($"{user.Mention} your account is linked but we can not find your profile.");
                         continue;
+                    }
 
                     // Check rating
                     if (profile.Rating > limit)
-                        continue; // $"Your rating {profile.Rating} is above the limit {limit}"
+                    {
+                        reasons.AppendLine($"{user.Mention} your rating of {(int)profile.Rating} is above the limit {limit}");
+                        continue;
+                    }
 
                     players.Add(link.SteamId);
                 }
 
+                reasons.Insert(0, $"Not enough players ({players.Count()}) meet the requirements so no lobby will be created. {Environment.NewLine}");
+
                 if (players.Count() < 10)
                 {
-                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"Not enough players meet the requirements so no lobby will be created."));
+                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent(reasons.ToString()));
                     return;
                 }
 
