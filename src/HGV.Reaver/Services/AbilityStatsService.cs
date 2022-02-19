@@ -61,9 +61,9 @@ namespace HGV.Reaver.Services
 
         public async Task<AbilityStat> GetAbility(string id)
         {
-            var abilityId = int.Parse(id);
+            var AbilityId = int.Parse(id);
             var collection = await this.GetAbilities();
-            var ability = collection.FirstOrDefault(_ => _.AbilityId == abilityId);
+            var ability = collection.FirstOrDefault(_ => _.AbilityId == AbilityId);
             if (ability is null)
                 throw new UserFriendlyException($"Unable to find ability {id}");
 

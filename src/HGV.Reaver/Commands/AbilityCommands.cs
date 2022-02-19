@@ -20,14 +20,13 @@ namespace HGV.Reaver.Commands
         {
         }
 
-        public Task<IEnumerable<DiscordAutoCompleteChoice>> Provider(AutocompleteContext ctx)
+        public async Task<IEnumerable<DiscordAutoCompleteChoice>> Provider(AutocompleteContext ctx)
         {
             var client = ctx.Services.GetService<IMetaClient>() ?? throw new NullReferenceException("AbilityAutocompleteProvider::Provider::IMetaClient");
 
             var collection = new List<DiscordAutoCompleteChoice>();
 
             var option = ctx.OptionValue?.ToString()?.ToLower() ?? string.Empty;
-            var heroes = client.GetHeroes();
             var abilties = client.GetAbilities();
 
             var filtered = abilties
@@ -43,7 +42,9 @@ namespace HGV.Reaver.Commands
                 .Take(10)
                 .ToList();
 
-            return Task.FromResult(choices.AsEnumerable());
+            await Task.Delay(1);
+
+           return choices;
         }
     }
 

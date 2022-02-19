@@ -14,10 +14,30 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Diagnostics;
+using HGV.Basilius;
 
 namespace HGV.Reaver.Commands
 {
     using Team = SteamKit2.GC.Dota.Internal.DOTA_GC_TEAM;
+
+    public class Option
+    {
+        public DiscordEmoji Emoji { get; set; }
+        public IEnumerable<Hero> Roster { get; set; }
+        public IReadOnlyList<DiscordUser> Users { get; set; }
+        public IEnumerable<ulong> Players { get; set; }
+
+        public Option(DiscordEmoji Emoji)
+        {
+            this.Emoji = Emoji;
+            this.Roster = new List<Hero>();
+            this.Users = new List<DiscordUser>();
+            this.Players = new List<ulong>();
+        }
+
+        public List<uint> Identities => Roster.Select(_ => (uint)_.Id).ToList();
+        public IEnumerable<string> Heroes => Roster.Select(_ => _.Name);
+    }
 
     public class RegionChoiceProvider : ChoiceProvider
     {
@@ -53,7 +73,7 @@ namespace HGV.Reaver.Commands
         private readonly IDotaService dota;
         private readonly IMetaClient meta;
 
-        public LobbyCommand(IOptions<ReaverSettings> settings, IAccountService accountService, IDotaService dota, IMetaClient meta)
+        public LobbyCommand(IOptions<ReaverSettings> settings, IAccountService accountService, IProfileService profileService, IDotaService dota, IMetaClient meta)
         {
             this.username = settings.Value?.SteamUsername ?? throw new ArgumentNullException(nameof(ReaverSettings.SteamUsername));
             this.password = settings.Value?.SteamPassword ?? throw new ArgumentNullException(nameof(ReaverSettings.SteamPassword));
@@ -79,14 +99,30 @@ namespace HGV.Reaver.Commands
                 var key = generator.Substring(0, 8);
                 var password = generator.Substring(9, 4);
                 var name = $"HGV {key}";
-              
-                var roster1 = this.meta.GetHeroes().Shuffle().Take(12);
-                var roster2 = this.meta.GetHeroes().Shuffle().Take(12);
-                var roster3 = this.meta.GetHeroes().Shuffle().Take(12);
+
+                var options = new List<Option>()
+                {
+                    new Option(DiscordEmoji.FromName(ctx.Client, ":one:"))      { Roster = this.meta.GetHeroes().Shuffle().Take(12).ToList() },
+                    new Option(DiscordEmoji.FromName(ctx.Client, ":two:"))      { Roster = this.meta.GetHeroes().Shuffle().Take(12).ToList() },
+                    new Option(DiscordEmoji.FromName(ctx.Client, ":three:"))    { Roster = this.meta.GetHeroes().Shuffle().Take(12).ToList() },
+                };
+
+                var content = new StringBuilder();
+                content.AppendLine($"Join the HGV bot as it host an inhouse lobby.");
+                content.AppendLine($"The Bot is waiting 5 minutes to collect players before trying to creating a lobby.");
+                content.AppendLine($"The Bot will invite the players tha reacted directly to the lobby via steamm.");
+                content.AppendLine($"When all 10 slots are full the Bot will start the count down.");
+                content.AppendLine($"Your accounts must be linked for this to work.");
+                content.AppendLine($"Each options is a different roster the Bot can set.");
+
+                for (int i = 0; i < 3; i++)
+                {
+                    content.AppendLine($"{options[i].Emoji} {string.Join(", ", options[i].Heroes)}");
+                }
 
                 var embed = new DiscordEmbedBuilder()
                        .WithTitle("HGV In House Lobby")
-                       .WithDescription("Join the HGV bot as it host an inhouse lobby.")
+                       .WithDescription(content.ToString())
                        .WithColor(DiscordColor.Purple);
 
                 embed.AddField("Lobby Name", $"{name}", false);
@@ -99,33 +135,28 @@ namespace HGV.Reaver.Commands
                 else
                     embed.AddField("Rating Cap", $"{limit}", false);
 
-                var one = DiscordEmoji.FromName(ctx.Client, ":one:", false);
-                var two = DiscordEmoji.FromName(ctx.Client, ":two:", false);
-                var three = DiscordEmoji.FromName(ctx.Client, ":three:", false);
-
-                var content = new StringBuilder();
-                content.AppendLine($"The HGV Bot is waiting to created a lobby.");
-                content.AppendLine($"The Bot will invite the first 10 players tha vote directly to the lobby via steam. You accounts must be linked for this to work.");
-                content.AppendLine($"Each options is a diferent roster the Bot can set.");
-                content.AppendLine($"{one}: {string.Join(",", roster1.Select(_ => _.Name))}");
-                content.AppendLine($"{two}: {string.Join(",", roster2.Select(_ => _.Name))}");
-                content.AppendLine($"{three}: {string.Join(",", roster3.Select(_ => _.Name))}");
-
                 var builder = new DiscordWebhookBuilder()
                     .WithContent(content.ToString())
                     .AddEmbed(embed);
 
                 var msg = await ctx.EditResponseAsync(builder);
-                await msg.CreateReactionAsync(one);
-                await msg.CreateReactionAsync(two);
-                await msg.CreateReactionAsync(three);
 
-                var reactions = await msg.CollectReactionsAsync(TimeSpan.FromMinutes(5));
+                for (int i = 0; i < 3; i++)
+                {
+                    await msg.CreateReactionAsync(options[i].Emoji);
+                }
 
-                var users = reactions.SelectMany(a => a.Users.Select(b => b)).ToList();
+                await Task.Delay(TimeSpan.FromMinutes(5));
+
+                for (int i = 0; i < 3; i++)
+                {
+                    options[i].Users = await msg.GetReactionsAsync(options[i].Emoji, 25, ctx.Client.CurrentUser.Id);
+                }
+
+                var users = options.SelectMany(_ => _.Users).DistinctBy(_ => _.Id).ToList();
                 if (users.Count() < 10)
                 {
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Not enough users ({users.Count()}) reacted so no lobby will be created."));
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Not enough users reacted so no lobby will be created."));
                     return;
                 }
 
@@ -152,20 +183,7 @@ namespace HGV.Reaver.Commands
                     return;
                 }
 
-                var option = reactions.OrderByDescending(_ => _.Total).Select(_ => _.Emoji).FirstOrDefault();
-                var heroes = new List<uint>();
-                if (option == one)
-                {
-                    heroes = roster1.Select(_ => (uint)_.Id).ToList();
-                }
-                else if (option == two)
-                {
-                    heroes = roster2.Select(_ => (uint)_.Id).ToList();
-                }
-                else if (option == three)
-                {
-                    heroes = roster3.Select(_ => (uint)_.Id).ToList();
-                }
+                var heroes = options.OrderByDescending(_ => _.Users.Count()).Select(_ => _.Identities).FirstOrDefault();
 
                 // Create Session.
                 var id = await this.dota.CreateSessionAsync(this.username, this.password);
