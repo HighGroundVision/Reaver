@@ -266,7 +266,7 @@ namespace HGV.Reaver.Commands
                 var cap = (limit == long.MaxValue) ? "None" : limit.ToString();
                 var region = this.meta.GetRegion((int)regionId);
 
-                var roster = this.meta.GetHeroes().Shuffle().Take(12).ToList();
+                var roster = this.meta.GetHeroes().Where(_ => _.AbilityDraftEnabled == true).Shuffle().Take(12).ToList();
                 var radiant = roster.Skip(0).Take(5).Select(_ => _.Name).ToList();
                 var dire = roster.Skip(5).Take(5).Select(_ => _.Name).ToList();
                 var extra = roster.Skip(10).Take(2).Select(_ => _.Name).ToList();
