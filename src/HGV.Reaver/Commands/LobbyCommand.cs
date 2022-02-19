@@ -150,7 +150,7 @@ namespace HGV.Reaver.Commands
 
                 await msg.CreateReactionAsync(emoji);
 
-                await Task.Delay(TimeSpan.FromMinutes(1));
+                await Task.Delay(TimeSpan.FromMinutes(5));
 
                 var reactions = await msg.GetReactionsAsync(emoji);
 
@@ -305,7 +305,7 @@ namespace HGV.Reaver.Commands
 
                 await msg.CreateReactionAsync(emoji);
 
-                await Task.Delay(TimeSpan.FromMinutes(1));
+                await Task.Delay(TimeSpan.FromMinutes(5));
                 
                 var reactions = await msg.GetReactionsAsync(emoji);
 
