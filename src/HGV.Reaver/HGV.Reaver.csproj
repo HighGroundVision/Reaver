@@ -14,7 +14,7 @@
     <PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01062" />
     <PackageReference Include="DSharpPlus.Interactivity" Version="4.2.0-nightly-01062" />
     <PackageReference Include="DSharpPlus.SlashCommands" Version="4.2.0-nightly-01062" />
-    <PackageReference Include="HGV.Basilius" Version="7.30.6" />
+    <PackageReference Include="HGV.Basilius" Version="7.31.1" />
     <PackageReference Include="HGV.Crystalys" Version="2.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="6.0.1" />
     <PackageReference Include="Polly" Version="7.2.3" />

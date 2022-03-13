@@ -126,10 +126,12 @@ namespace HGV.Reaver.Commands
                 var emoji = DiscordEmoji.FromName(ctx.Client, ":dota:", true);
 
                 var content = new StringBuilder();
-                content.AppendLine($"Join the HGV bot as it host an inhouse lobby.");
-                content.AppendLine($"The Bot is waiting 5 minutes to collect players before trying to creating a lobby.");
-                content.AppendLine($"It will invite the players that reacted with {emoji} directly to the lobby via steam.");
-                content.AppendLine($"When all 10 slots in the lobby are full the Bot will start the count down.");
+                content.Append($"Join the HGV bot as it host an inhouse lobby.");
+                content.AppendLine();
+                content.Append($"The Bot is waiting 5 minutes to collect players before trying to creating a lobby.");
+                content.Append($"It will invite the players that reacted with {emoji} directly to the lobby via steam.");
+                content.Append($"When all 10 slots in the lobby are full the Bot will start the count down.");
+                content.AppendLine();
 
                 var embedLobby = new DiscordEmbedBuilder()
                     .WithTitle("HGV Blitz Match")
@@ -289,11 +291,13 @@ namespace HGV.Reaver.Commands
                 var emoji = DiscordEmoji.FromName(ctx.Client, ":dota:", true);
 
                 var content = new StringBuilder();
-                content.AppendLine($"Join the HGV bot as it host an inhouse lobby.");
-                content.AppendLine($"The Bot is waiting 5 minutes to collect players before trying to creating a lobby.");
-                content.AppendLine($"It will invite the players that reacted with {emoji} directly to the lobby via steam.");
-                content.AppendLine($"When all 10 slots in the lobby are full the Bot will start the count down.");
-                
+                content.Append($"Join the HGV bot as it host an inhouse lobby.");
+                content.AppendLine();
+                content.Append($"The Bot is waiting 5 minutes to collect players before trying to creating a lobby.");
+                content.Append($"It will invite the players that reacted with {emoji} directly to the lobby via steam.");
+                content.Append($"When all 10 slots in the lobby are full the Bot will start the count down.");
+                content.AppendLine();
+
                 var embedLobby = new DiscordEmbedBuilder()
                     .WithTitle("HGV Blitz Match")
                     .WithDescription(content.ToString())
