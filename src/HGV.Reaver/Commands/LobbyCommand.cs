@@ -32,9 +32,10 @@ namespace HGV.Reaver.Commands
         {
             var collection = new List<DiscordApplicationCommandOptionChoice>();
             collection.Add(new DiscordApplicationCommandOptionChoice("Default", 0));
-            collection.Add(new DiscordApplicationCommandOptionChoice("Custom", 1));
-            collection.Add(new DiscordApplicationCommandOptionChoice("Single Draft", 2));
-            collection.Add(new DiscordApplicationCommandOptionChoice("All Pick", 3));
+            collection.Add(new DiscordApplicationCommandOptionChoice("Random", 1));
+            collection.Add(new DiscordApplicationCommandOptionChoice("Host Choice", 3));
+            collection.Add(new DiscordApplicationCommandOptionChoice("Single Draft", 4));
+            collection.Add(new DiscordApplicationCommandOptionChoice("All Pick", 5));
 
             return Task.FromResult(collection.AsEnumerable());
         }
@@ -105,11 +106,11 @@ namespace HGV.Reaver.Commands
 
             switch (type)
             {
-                case 1:
-                    await CreateCustomLobby(ctx, name, password, regionId, shuffle_teams, shuffle_players, limit);
-                    break;
                 case 0:
                     await CreateDefautLobby(ctx, name, password, regionId, shuffle_teams, shuffle_players, limit);
+                    break;
+                case 1:
+                    await CreateRandomLobby(ctx, name, password, regionId, shuffle_teams, shuffle_players, limit);
                     break;
                 default:
                     throw new UserFriendlyException("Invaild Lobby Type");
@@ -128,9 +129,7 @@ namespace HGV.Reaver.Commands
                 var content = new StringBuilder();
                 content.Append($"Join the HGV bot as it host an inhouse lobby.");
                 content.AppendLine();
-                content.Append($"The Bot is waiting 5 minutes to collect players before trying to creating a lobby.");
-                content.Append($"It will invite the players that reacted with {emoji} directly to the lobby via steam.");
-                content.Append($"When all 10 slots in the lobby are full the Bot will start the count down.");
+                content.Append($"The Bot is waiting 10 minutes to collect players before trying to creating a lobby then 5 mins when the lobby is created for all players to be ready. It will invite the players that reacted with {emoji} directly to the lobby via steam. When all 10 slots in the lobby are full the Bot will start the count down.");
                 content.AppendLine();
 
                 var embedLobby = new DiscordEmbedBuilder()
@@ -152,7 +151,7 @@ namespace HGV.Reaver.Commands
 
                 await msg.CreateReactionAsync(emoji);
 
-                await Task.Delay(TimeSpan.FromMinutes(5));
+                await Task.Delay(TimeSpan.FromMinutes(10));
 
                 var reactions = await msg.GetReactionsAsync(emoji);
 
@@ -274,7 +273,7 @@ namespace HGV.Reaver.Commands
             }
         }
       
-        private async Task CreateCustomLobby(InteractionContext ctx, string name, string password, long regionId, bool shuffle_teams, bool shuffle_players, long limit)
+        private async Task CreateRandomLobby(InteractionContext ctx, string name, string password, long regionId, bool shuffle_teams, bool shuffle_players, long limit)
         {
             try
             {
@@ -293,9 +292,7 @@ namespace HGV.Reaver.Commands
                 var content = new StringBuilder();
                 content.Append($"Join the HGV bot as it host an inhouse lobby.");
                 content.AppendLine();
-                content.Append($"The Bot is waiting 5 minutes to collect players before trying to creating a lobby.");
-                content.Append($"It will invite the players that reacted with {emoji} directly to the lobby via steam.");
-                content.Append($"When all 10 slots in the lobby are full the Bot will start the count down.");
+                content.Append($"The Bot is waiting 10 minutes to collect players before trying to creating a lobby then 5 mins when the lobby is created for all players to be ready. It will invite the players that reacted with {emoji} directly to the lobby via steam. When all 10 slots in the lobby are full the Bot will start the count down.");
                 content.AppendLine();
 
                 var embedLobby = new DiscordEmbedBuilder()
@@ -322,7 +319,7 @@ namespace HGV.Reaver.Commands
 
                 await msg.CreateReactionAsync(emoji);
 
-                await Task.Delay(TimeSpan.FromMinutes(5));
+                await Task.Delay(TimeSpan.FromMinutes(10));
                 
                 var reactions = await msg.GetReactionsAsync(emoji);
 
@@ -445,3 +442,4 @@ namespace HGV.Reaver.Commands
         }
     }
 }
+
