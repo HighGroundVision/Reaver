@@ -55,6 +55,8 @@ namespace HGV.Reaver.Services
             };
             edit.Timeline = new Timeline()
             {
+                Soundtrack = null,
+                Background = "#000000",
                 Tracks = new List<Track>()
                 {
                     new Track()
