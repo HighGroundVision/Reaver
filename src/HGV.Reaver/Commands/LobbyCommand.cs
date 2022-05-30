@@ -124,7 +124,7 @@ namespace HGV.Reaver.Commands
                 var cap = (limit == long.MaxValue) ? "None" : limit.ToString();
                 var region = this.meta.GetRegion((int)regionId);
 
-                var emoji = DiscordEmoji.FromName(ctx.Client, ":dota:", true);
+                var emoji = DiscordEmoji.FromName(ctx.Client, ":arrow_forward:", true);
 
                 var content = new StringBuilder();
                 content.Append($"Join the HGV bot as it host an inhouse lobby.");
