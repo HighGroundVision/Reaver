@@ -287,7 +287,7 @@ namespace HGV.Reaver.Commands
 
                 var thumbnail = await hyperstoneService.StorageRosterImage(roster);
 
-                var emoji = DiscordEmoji.FromName(ctx.Client, ":dota:", true);
+                var emoji = DiscordEmoji.FromName(ctx.Client, ":arrow_forward:", true);
 
                 var content = new StringBuilder();
                 content.Append($"Join the HGV bot as it host an inhouse lobby.");
