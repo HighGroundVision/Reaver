@@ -151,11 +151,20 @@ namespace HGV.Reaver.Commands
 
                 await msg.CreateReactionAsync(emoji);
 
-                await Task.Delay(TimeSpan.FromMinutes(10));
+                var users = new HashSet<DiscordUser>();
+                for (int i = 0; i < 10; i++)
+                {
+                    await Task.Delay(TimeSpan.FromMinutes(1));
 
-                var reactions = await msg.GetReactionsAsync(emoji);
+                    var reactions = await msg.GetReactionsAsync(emoji);
+                    var whom = reactions.DistinctBy(_ => _.Id).Where(_ => _.IsBot == false).ToList();
+                    foreach (var item in whom)
+                        users.Add(item);
 
-                var users = reactions.DistinctBy(_ => _.Id).Where(_ => _.IsBot == false).ToList();
+                    if (users.Count >= 10)
+                        break;
+                }
+
                 if (users.Count() < 10)
                 {
                     await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"Not enough users reacted so no lobby will be created."));

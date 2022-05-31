@@ -10,10 +10,10 @@
     <PackageReference Include="AspNet.Security.OAuth.Discord" Version="6.0.2" />
     <PackageReference Include="AspNet.Security.OpenId.Steam" Version="6.0.0" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.10.0" />
-    <PackageReference Include="DSharpPlus" Version="4.2.0-nightly-01062" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01062" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.2.0-nightly-01062" />
-    <PackageReference Include="DSharpPlus.SlashCommands" Version="4.2.0-nightly-01062" />
+    <PackageReference Include="DSharpPlus" Version="4.2.0" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.2.0" />
+    <PackageReference Include="DSharpPlus.SlashCommands" Version="4.2.0" />
     <PackageReference Include="HGV.Basilius" Version="7.31.1" />
     <PackageReference Include="HGV.Crystalys" Version="2.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="6.0.1" />
