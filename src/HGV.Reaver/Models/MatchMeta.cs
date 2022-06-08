@@ -13,6 +13,15 @@ namespace HGV.Reaver.Models.MatchData
         public const string Parsed = "parsed";
     }
 
+    public class MatchMetaStates
+    {
+        public const string Error = "Error";
+        public const string MatchNotFound = "MatchNotFound";
+        public const string ReplayNotFound = "ReplayNotFound";
+        public const string NotParsed = "NotParsed";
+        public const string Parsed = "Parsed";
+    }
+
     public class MatchMeta
     {
         [JsonProperty("status")]

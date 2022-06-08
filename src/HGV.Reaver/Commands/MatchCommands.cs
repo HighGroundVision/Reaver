@@ -30,6 +30,46 @@ namespace HGV.Reaver.Commands
             this.metaClient = metaClient;
         }
 
+
+        [SlashCommand("Check", "Check Match Status in Windrun.io")]
+        public async Task Check(InteractionContext ctx, [Option("MatchId", "The Id of the match")] long matchId)
+        {
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder());
+
+            var meta = await this.matchServices.GetMeta(matchId);
+
+            var status = MatchMetaStates.Error;
+            if (meta.Status != MatchMetaStatus.OK)
+                status = MatchMetaStates.MatchNotFound;
+            else if (meta.ReplayUrlAcquired == false)
+                status = MatchMetaStates.ReplayNotFound;
+            else if (meta.State == null)
+                status = MatchMetaStates.NotParsed;
+            else if (meta.State == MatchMetaStatus.Parsed)
+                status = MatchMetaStates.Parsed;
+
+            var builder = new DiscordWebhookBuilder();
+            switch (status)
+            {
+                case MatchMetaStates.MatchNotFound:
+                    builder.WithContent($"Error get match for Dota network. Please check you match Id and try again.");
+                    break;
+                case MatchMetaStates.ReplayNotFound:
+                    builder.WithContent($"The match exists in the Dota network but the replay is not aviable yet.");
+                    break;
+                case MatchMetaStates.NotParsed:
+                    builder.WithContent($"The match exists in windrun but it has not been processed yet. We have expedited this match.");
+                    break;
+                case MatchMetaStates.Parsed:
+                    builder.WithContent($"The match is parsed and should be available. \n https://windrun.io/matches/{matchId}");
+                    break;
+                default:
+                    builder.WithContent($"The match exists in windrun but there was an issue processing the match.");
+                    break;
+            }
+            await ctx.EditResponseAsync(builder);
+        }
+
         [SlashCommand("Card", "Match Summary")]
         public async Task Card(InteractionContext ctx, [Option("MatchId", "The Id of the match")] long matchId)
         {
