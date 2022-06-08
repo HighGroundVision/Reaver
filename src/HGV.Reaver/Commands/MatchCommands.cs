@@ -52,19 +52,19 @@ namespace HGV.Reaver.Commands
             switch (status)
             {
                 case MatchMetaStates.MatchNotFound:
-                    builder.WithContent($"Error get match for Dota network. Please check you match Id and try again.");
+                    builder.WithContent($"Error getting match for Dota. Please check your match Id and try again.");
                     break;
                 case MatchMetaStates.ReplayNotFound:
-                    builder.WithContent($"The match exists in the Dota network but the replay is not aviable yet.");
+                    builder.WithContent($"The match exists but the replay is not aviable yet.");
                     break;
                 case MatchMetaStates.NotParsed:
-                    builder.WithContent($"The match exists in windrun but it has not been processed yet. We have expedited this match.");
+                    builder.WithContent($"The match exists but it has not been processed yet. This match has been expedited.");
                     break;
                 case MatchMetaStates.Parsed:
                     builder.WithContent($"The match is parsed and should be available. \n https://windrun.io/matches/{matchId}");
                     break;
                 default:
-                    builder.WithContent($"The match exists in windrun but there was an issue processing the match.");
+                    builder.WithContent($"The match exists but there was an error processing the match.");
                     break;
             }
             await ctx.EditResponseAsync(builder);
