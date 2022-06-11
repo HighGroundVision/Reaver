@@ -174,12 +174,6 @@ namespace HGV.Reaver.Commands
                         break;
                 }
 
-                if (users.Count() < 10)
-                {
-                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"Not enough users reacted so no lobby will be created."));
-                    return;
-                }
-
                 var reasons = new List<string>();
                 var players = new List<ulong>();
 
@@ -359,12 +353,6 @@ namespace HGV.Reaver.Commands
 
                     if (users.Count >= 10)
                         break;
-                }
-
-                if (users.Count() < 10)
-                {
-                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"Not enough users reacted so no lobby will be created."));
-                    return;
                 }
 
                 var reasons = new List<string>();
