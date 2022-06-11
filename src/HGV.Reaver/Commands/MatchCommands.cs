@@ -55,7 +55,7 @@ namespace HGV.Reaver.Commands
                     builder.WithContent($"Error getting match for Dota. Please check your match Id and try again.");
                     break;
                 case MatchMetaStates.ReplayNotFound:
-                    builder.WithContent($"The match exists but the replay is not aviable yet.");
+                    builder.WithContent($"The match exists but the replay is not available yet.");
                     break;
                 case MatchMetaStates.NotParsed:
                     builder.WithContent($"The match exists but it has not been processed yet. This match has been expedited.");

@@ -171,7 +171,7 @@ namespace HGV.Reaver.Commands
                     return;
                 }
 
-                var reasons = new StringBuilder();
+                var reasons = new List<string>();
                 var players = new List<ulong>();
 
                 foreach (var user in users)
@@ -180,7 +180,7 @@ namespace HGV.Reaver.Commands
                     var link = await accountService.Get(ctx.Guild.Id, user.Id);
                     if (link is null)
                     {
-                        reasons.AppendLine($"{user.Mention} your account is not linked. Plese run the '/account link' command.");
+                        reasons.Add($"{user.Mention} your account is not linked. Plese run the '/account link' command.");
                         continue;
                     }
 
@@ -188,25 +188,34 @@ namespace HGV.Reaver.Commands
                     var profile = await profileService.GetDotaProfile(link.SteamId);
                     if (profile is null)
                     {
-                        reasons.AppendLine($"{user.Mention} your account is linked but we can not find your profile.");
+                        reasons.Add($"{user.Mention} your account is linked but we can not find your profile.");
                         continue;
                     }
 
                     // Check rating
                     if (profile.Rating > limit)
                     {
-                        reasons.AppendLine($"{user.Mention} your rating of {(int)profile.Rating} is above the limit {limit}");
+                        reasons.Add($"{user.Mention} your rating of {(int)profile.Rating} is above the limit {limit}");
                         continue;
                     }
 
                     players.Add(link.SteamId);
                 }
 
-                reasons.Insert(0, $"Not enough players ({players.Count()}) meet the requirements so no lobby will be created. {Environment.NewLine}");
-
                 if (players.Count() < 10)
                 {
-                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent(reasons.ToString()));
+                    reasons.Add($"Not enough players ({players.Count()}) start a lobby.");
+                }
+
+                if (reasons.Count > 0)
+                {
+                    var warnings = new StringBuilder();
+                    warnings.AppendLine("The Bot can't start the lobby becasuse of the following errors:");
+
+                    foreach (var reason in reasons)
+                        warnings.AppendLine(reason);
+
+                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent(warnings.ToString()));
                     return;
                 }
 
