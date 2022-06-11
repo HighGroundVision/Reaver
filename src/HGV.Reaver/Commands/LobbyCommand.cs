@@ -109,7 +109,7 @@ namespace HGV.Reaver.Commands
                     await CreateRandomLobby(ctx, name, password, regionId, shuffle_teams, shuffle_players, limit);
                     break;
                 default:
-                    throw new UserFriendlyException("Invaild Lobby Type");
+                    throw new UserFriendlyException("Invalid Lobby Type");
             }
         }
 
@@ -136,9 +136,9 @@ namespace HGV.Reaver.Commands
                 var emoji = GetEmoji(ctx);
 
                 var content = new StringBuilder();
-                content.Append($"Join the HGV bot as it host an inhouse lobby.");
+                content.Append($"Join the HGV bot as it host an in-house lobby.");
                 content.AppendLine();
-                content.Append($"The Bot is waiting 10 minutes to collect players before trying to creating a lobby then 5 mins when the lobby is created for all players to be ready. It will invite the players that reacted with {emoji} directly to the lobby via steam. When all 10 slots in the lobby are full the Bot will start the count down.");
+                content.Append($"The Bot is waiting 10 minutes to collect players before trying to creating a lobby then 5 minutes when the lobby is created for all players to be ready. It will invite the players that reacted with {emoji} directly to the lobby via steam. When all 10 slots in the lobby are full the Bot will start the count down.");
                 content.AppendLine();
 
                 var embedLobby = new DiscordEmbedBuilder()
@@ -183,7 +183,7 @@ namespace HGV.Reaver.Commands
                     var link = await accountService.Get(ctx.Guild.Id, user.Id);
                     if (link is null)
                     {
-                        reasons.Add($"{user.Mention} your account is not linked. Plese run the '/account link' command.");
+                        reasons.Add($"{user.Mention} your account is not linked. Please run the '/account link' command.");
                         continue;
                     }
 
@@ -191,7 +191,7 @@ namespace HGV.Reaver.Commands
                     var profile = await profileService.GetDotaProfile(link.SteamId);
                     if (profile is null)
                     {
-                        reasons.Add($"{user.Mention} your account is linked but we can not find your profile.");
+                        reasons.Add($"{user.Mention} your account is linked but the Bot can't find your profile.");
                         continue;
                     }
 
@@ -207,13 +207,13 @@ namespace HGV.Reaver.Commands
 
                 if (players.Count() < 10)
                 {
-                    reasons.Add($"Not enough players ({players.Count()}) start a lobby.");
+                    reasons.Add($"Not enough players. ({players.Count()})");
                 }
 
                 if (reasons.Count > 0)
                 {
                     var warnings = new StringBuilder();
-                    warnings.AppendLine("The Bot can't start the lobby becasuse of the following errors:");
+                    warnings.AppendLine("The Bot can't start the lobby because:");
 
                     foreach (var reason in reasons)
                         warnings.AppendLine(reason);
@@ -311,9 +311,9 @@ namespace HGV.Reaver.Commands
                 var emoji = GetEmoji(ctx);
 
                 var content = new StringBuilder();
-                content.Append($"Join the HGV bot as it host an inhouse lobby.");
+                content.Append($"Join the HGV bot as it host an in-house lobby.");
                 content.AppendLine();
-                content.Append($"The Bot is waiting 10 minutes to collect players before trying to creating a lobby then 5 mins when the lobby is created for all players to be ready. It will invite the players that reacted with {emoji} directly to the lobby via steam. When all 10 slots in the lobby are full the Bot will start the count down.");
+                content.Append($"The Bot is waiting 10 minutes to collect players before trying to creating a lobby then 5 minutes when the lobby is created for all players to be ready. It will invite the players that reacted with {emoji} directly to the lobby via steam. When all 10 slots in the lobby are full the Bot will start the count down.");
                 content.AppendLine();
 
                 var embedLobby = new DiscordEmbedBuilder()
@@ -364,7 +364,7 @@ namespace HGV.Reaver.Commands
                     var link = await accountService.Get(ctx.Guild.Id, user.Id);
                     if (link is null)
                     {
-                        reasons.Add($"{user.Mention} your account is not linked. Plese run the '/account link' command.");
+                        reasons.Add($"{user.Mention} your account is not linked. Please run the '/account link' command.");
                         continue;
                     }
 
@@ -372,14 +372,14 @@ namespace HGV.Reaver.Commands
                     var profile = await profileService.GetDotaProfile(link.SteamId);
                     if (profile is null)
                     {
-                        reasons.Add($"{user.Mention} your account is linked but we can not find your profile.");
+                        reasons.Add($"{user.Mention} your account is linked but the Bot can't find your profile.");
                         continue;
                     }
 
                     // Check rating
                     if (profile.Rating > limit)
                     {
-                        reasons.Add($"{user.Mention} your rating of {(int)profile.Rating} is above the limit {limit}");
+                        reasons.Add($"{user.Mention} your rating of {(int)profile.Rating} is above the limit {limit}.");
                         continue;
                     }
 
@@ -388,13 +388,13 @@ namespace HGV.Reaver.Commands
 
                 if (players.Count() < 10)
                 {
-                    reasons.Add($"Not enough players ({players.Count()}) start a lobby.");
+                    reasons.Add($"Not enough players. ({players.Count()})");
                 }
 
                 if (reasons.Count > 0)
                 {
                     var warnings = new StringBuilder();
-                    warnings.AppendLine("The Bot can't start the lobby becasuse of the following errors:");
+                    warnings.AppendLine("The Bot can't start the lobby because:");
 
                     foreach (var reason in reasons)
                         warnings.AppendLine(reason);
