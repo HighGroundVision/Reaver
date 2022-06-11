@@ -144,7 +144,8 @@ namespace HGV.Reaver.Commands
                 var embedLobby = new DiscordEmbedBuilder()
                     .WithTitle("HGV Blitz Match")
                     .WithDescription(content.ToString())
-                    .WithColor(DiscordColor.Purple);
+                    .WithColor(DiscordColor.Purple)
+                    .WithFooter(password);
 
                 embedLobby.AddField("Lobby Name", $"{name}", false);
                 embedLobby.AddField("Region", $"{region.Name}", false);
@@ -233,6 +234,9 @@ namespace HGV.Reaver.Commands
                 // Get Lobby.
                 var _lobby = this.dota.GetActiveLobby();
 
+                // Join and Get the Lobby Chat Channel.
+                var channel = await dota.JoinLobbyChatAsync();
+
                 // Kick Bot From Team
                 await dota.KickPlayerFromLobbyTeam(id.AccountID);
 
@@ -241,22 +245,30 @@ namespace HGV.Reaver.Commands
                     // Invite to lobby
                     await dota.InviteToLobby(player);
                 }
-
                 var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
 
                 var ready = 0;
                 do
                 {
-                    cts.Token.ThrowIfCancellationRequested();
+                    if (cts.IsCancellationRequested)
+                        break;
 
-                    // Wait 10 seconds
-                    await Task.Delay(TimeSpan.FromSeconds(10), cts.Token);
+                    await Task.Delay(TimeSpan.FromSeconds(10), cts.Token); // Wait 10 seconds
 
                     var lobby = this.dota.GetActiveLobby();
-
                     ready = lobby.all_members.Count(_ => _.team == Team.DOTA_GC_TEAM_GOOD_GUYS || _.team == Team.DOTA_GC_TEAM_BAD_GUYS);
                 }
                 while (ready < 10);
+
+                if (cts.IsCancellationRequested)
+                {
+                    await dota.DestroyLobbyAsync();
+
+                    var error = $":warning: Only ({ready}) slots were filed the match can't start with less then 10.";
+                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent(error));
+
+                    return;
+                }
 
                 // Shuffle Teams if requested
                 if (shuffle_teams)
@@ -264,18 +276,22 @@ namespace HGV.Reaver.Commands
                     await dota.ShuffleTeams();
                 }
 
-                // Join and Get the Lobby Chat Channel.
-                var channel = await dota.JoinLobbyChatAsync();
+                // Message the Discord with Lunch Warning.
+                var countdown = await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"T minus 5 seconds and counting... No going back now!"));
 
-                // message the lobby with Lunch Warning.
-                await dota.SendChatMessage(channel.channel_id, $"T minus 5 seconds and counting");
+                // Message the lobby with Lunch Warning.
+                await dota.SendChatMessage(channel.channel_id, $"T minus 5 seconds and counting... No going back now!");
 
                 // Countdown
                 for (int i = 5; i >= 0; i--)
                 {
                     await Task.Delay(TimeSpan.FromSeconds(1));
                     await dota.SendChatMessage(channel.channel_id, $"{i}");
+                    await countdown.ModifyAsync($"{i}");
                 }
+
+                await dota.SendChatMessage(channel.channel_id, $"Launching Game");
+                await countdown.ModifyAsync($"Launching Game");
 
                 // Launch Game
                 await dota.LaunchGameAsync();
@@ -319,7 +335,8 @@ namespace HGV.Reaver.Commands
                 var embedLobby = new DiscordEmbedBuilder()
                     .WithTitle("HGV Blitz Match")
                     .WithDescription(content.ToString())
-                    .WithColor(DiscordColor.SpringGreen);
+                    .WithColor(DiscordColor.SpringGreen)
+                    .WithFooter(password);
 
                 embedLobby.AddField("Lobby Name", $"{name}", false);
                 embedLobby.AddField("Region", $"{region.Name}", false);
@@ -333,13 +350,9 @@ namespace HGV.Reaver.Commands
 
                 embedLobby.WithImageUrl(thumbnail);
 
-                var builder = new DiscordWebhookBuilder()
-                    .AddEmbed(embedLobby);
-
+                var builder = new DiscordWebhookBuilder().AddEmbed(embedLobby);
                 var msg = await ctx.EditResponseAsync(builder);
-
                 await msg.CreateReactionAsync(emoji);
-
 
                 var users = new HashSet<DiscordUser>();
                 for (int i = 0; i < 10; i++)
@@ -386,15 +399,15 @@ namespace HGV.Reaver.Commands
                     players.Add(link.SteamId);
                 }
 
-                if (players.Count() < 10)
-                {
-                    reasons.Add($"Not enough players. ({players.Count()})");
-                }
+                //if (players.Count() < 10)
+                //{
+                //    reasons.Add($"Not enough players. ({players.Count()})");
+                //}
 
                 if (reasons.Count > 0)
                 {
                     var warnings = new StringBuilder();
-                    warnings.AppendLine("The Bot can't start the lobby because:");
+                    warnings.AppendLine(":warning: The Bot can't start the lobby because:");
 
                     foreach (var reason in reasons)
                         warnings.AppendLine(reason);
@@ -414,6 +427,9 @@ namespace HGV.Reaver.Commands
                 // Get Lobby.
                 var _lobby = this.dota.GetActiveLobby();
 
+                // Join and Get the Lobby Chat Channel.
+                var channel = await dota.JoinLobbyChatAsync();
+
                 // Kick Bot From Team
                 await dota.KickPlayerFromLobbyTeam(id.AccountID);
 
@@ -428,16 +444,25 @@ namespace HGV.Reaver.Commands
                 var ready = 0;
                 do
                 {
-                    cts.Token.ThrowIfCancellationRequested();
+                    if (cts.IsCancellationRequested)
+                        break;
 
-                    // Wait 10 seconds
-                    await Task.Delay(TimeSpan.FromSeconds(10), cts.Token);
+                    await Task.Delay(TimeSpan.FromSeconds(10), cts.Token); // Wait 10 seconds
 
                     var lobby = this.dota.GetActiveLobby();
-
                     ready = lobby.all_members.Count(_ => _.team == Team.DOTA_GC_TEAM_GOOD_GUYS || _.team == Team.DOTA_GC_TEAM_BAD_GUYS);
                 }
                 while (ready < 10);
+
+                if(cts.IsCancellationRequested)
+                {
+                    await dota.DestroyLobbyAsync();
+
+                    var error = $":warning: Only ({ready}) slots were filed the match can't start with less then 10.";
+                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent(error));
+                    
+                    return;
+                }
 
                 // Shuffle Teams if requested
                 if (shuffle_teams)
@@ -445,25 +470,25 @@ namespace HGV.Reaver.Commands
                     await dota.ShuffleTeams();
                 }
 
-                // Join and Get the Lobby Chat Channel.
-                var channel = await dota.JoinLobbyChatAsync();
+                // Message the Discord with Lunch Warning.
+                var countdown = await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"T minus 5 seconds and counting... No going back now!"));
 
-                // message the lobby with Lunch Warning.
-                await dota.SendChatMessage(channel.channel_id, $"T minus 5 seconds and counting");
+                // Message the lobby with Lunch Warning.
+                await dota.SendChatMessage(channel.channel_id, $"T minus 5 seconds and counting... No going back now!");
 
                 // Countdown
                 for (int i = 5; i >= 0; i--)
                 {
                     await Task.Delay(TimeSpan.FromSeconds(1));
                     await dota.SendChatMessage(channel.channel_id, $"{i}");
+                    await countdown.ModifyAsync($"{i}");
                 }
+
+                await dota.SendChatMessage(channel.channel_id, $"Launching Game");
+                await countdown.ModifyAsync($"Launching Game");
 
                 // Launch Game
                 await dota.LaunchGameAsync();
-            }
-            catch (OperationCanceledException)
-            {
-                await dota.DestroyLobbyAsync();
             }
             catch (Exception)
             {
