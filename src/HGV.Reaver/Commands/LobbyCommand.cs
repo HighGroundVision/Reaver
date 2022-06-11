@@ -355,7 +355,7 @@ namespace HGV.Reaver.Commands
                 await msg.CreateReactionAsync(emoji);
 
                 var users = new HashSet<DiscordUser>();
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < 1; i++)
                 {
                     await Task.Delay(TimeSpan.FromMinutes(1));
 
@@ -439,7 +439,7 @@ namespace HGV.Reaver.Commands
                     await dota.InviteToLobby(player);
                 }
 
-                var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
+                var cts = new CancellationTokenSource(TimeSpan.FromMinutes(1));
 
                 var ready = 0;
                 do
@@ -460,7 +460,8 @@ namespace HGV.Reaver.Commands
 
                     var error = $":warning: Only ({ready}) slots were filed the match can't start with less then 10.";
                     await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent(error));
-                    
+                    await dota.SendChatMessage(channel.channel_id, error);
+
                     return;
                 }
 
@@ -471,21 +472,23 @@ namespace HGV.Reaver.Commands
                 }
 
                 // Message the Discord with Lunch Warning.
-                var countdown = await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"T minus 5 seconds and counting... No going back now!"));
+                var warning = $"T minus 5 seconds and counting... No going back now!";
+                var countdown = await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent(warning));
 
                 // Message the lobby with Lunch Warning.
-                await dota.SendChatMessage(channel.channel_id, $"T minus 5 seconds and counting... No going back now!");
+                await dota.SendChatMessage(channel.channel_id, warning);
 
                 // Countdown
                 for (int i = 5; i >= 0; i--)
                 {
                     await Task.Delay(TimeSpan.FromSeconds(1));
                     await dota.SendChatMessage(channel.channel_id, $"{i}");
-                    await countdown.ModifyAsync($"{i}");
+                    //await countdown.ModifyAsync($"{i}");
                 }
 
-                await dota.SendChatMessage(channel.channel_id, $"Launching Game");
-                await countdown.ModifyAsync($"Launching Game");
+                var go = $"Launching Game";
+                await dota.SendChatMessage(channel.channel_id, go);
+                //await countdown.ModifyAsync(go);
 
                 // Launch Game
                 await dota.LaunchGameAsync();
