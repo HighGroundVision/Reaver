@@ -355,7 +355,7 @@ namespace HGV.Reaver.Commands
                 await msg.CreateReactionAsync(emoji);
 
                 var users = new HashSet<DiscordUser>();
-                for (int i = 0; i < 1; i++)
+                for (int i = 0; i < 10; i++)
                 {
                     await Task.Delay(TimeSpan.FromMinutes(1));
 
@@ -399,10 +399,10 @@ namespace HGV.Reaver.Commands
                     players.Add(link.SteamId);
                 }
 
-                //if (players.Count() < 10)
-                //{
-                //    reasons.Add($"Not enough players. ({players.Count()})");
-                //}
+                if (players.Count() < 10)
+                {
+                    reasons.Add($"Not enough players. ({players.Count()})");
+                }
 
                 if (reasons.Count > 0)
                 {
@@ -439,7 +439,7 @@ namespace HGV.Reaver.Commands
                     await dota.InviteToLobby(player);
                 }
 
-                var cts = new CancellationTokenSource(TimeSpan.FromMinutes(1));
+                var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
 
                 var ready = 0;
                 do
@@ -447,14 +447,14 @@ namespace HGV.Reaver.Commands
                     if (cts.IsCancellationRequested)
                         break;
 
-                    await Task.Delay(TimeSpan.FromSeconds(10), cts.Token); // Wait 10 seconds
+                    await Task.Delay(TimeSpan.FromSeconds(10)); // Wait 10 seconds
 
                     var lobby = this.dota.GetActiveLobby();
                     ready = lobby.all_members.Count(_ => _.team == Team.DOTA_GC_TEAM_GOOD_GUYS || _.team == Team.DOTA_GC_TEAM_BAD_GUYS);
                 }
                 while (ready < 10);
 
-                if(cts.IsCancellationRequested)
+                if (cts.IsCancellationRequested)
                 {
                     await dota.DestroyLobbyAsync();
 
