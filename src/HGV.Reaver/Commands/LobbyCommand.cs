@@ -1,18 +1,14 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using HGV.Basilius;
 using HGV.Basilius.Client;
 using HGV.Reaver.Models;
 using HGV.Reaver.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -117,6 +113,19 @@ namespace HGV.Reaver.Commands
             }
         }
 
+        private DiscordEmoji GetEmoji(InteractionContext ctx)
+        {
+            var emoji1 = DiscordEmoji.FromName(ctx.Client, ":dota:", true);
+            if (emoji1 is not null)
+                return emoji1;
+
+            var emoji2 = DiscordEmoji.FromName(ctx.Client, ":arrow_forward:", true);
+            if (emoji2 is not null)
+                return emoji2;
+
+            throw new Exception("Can't find primary emoji :dota: or backup emoji :arrow_forward:");
+        }
+
         private async Task CreateDefautLobby(InteractionContext ctx, string name, string password, long regionId, bool shuffle_teams, bool shuffle_players, long limit)
         {
             try
@@ -124,7 +133,7 @@ namespace HGV.Reaver.Commands
                 var cap = (limit == long.MaxValue) ? "None" : limit.ToString();
                 var region = this.meta.GetRegion((int)regionId);
 
-                var emoji = DiscordEmoji.FromName(ctx.Client, ":arrow_forward:", true);
+                var emoji = GetEmoji(ctx);
 
                 var content = new StringBuilder();
                 content.Append($"Join the HGV bot as it host an inhouse lobby.");
@@ -305,7 +314,7 @@ namespace HGV.Reaver.Commands
 
                 var thumbnail = await hyperstoneService.StorageRosterImage(roster);
 
-                var emoji = DiscordEmoji.FromName(ctx.Client, ":arrow_forward:", true);
+                var emoji = GetEmoji(ctx);
 
                 var content = new StringBuilder();
                 content.Append($"Join the HGV bot as it host an inhouse lobby.");
@@ -337,18 +346,28 @@ namespace HGV.Reaver.Commands
 
                 await msg.CreateReactionAsync(emoji);
 
-                await Task.Delay(TimeSpan.FromMinutes(10));
-                
-                var reactions = await msg.GetReactionsAsync(emoji);
 
-                var users = reactions.DistinctBy(_ => _.Id).Where(_ => _.IsBot == false).ToList();
+                var users = new HashSet<DiscordUser>();
+                for (int i = 0; i < 10; i++)
+                {
+                    await Task.Delay(TimeSpan.FromMinutes(1));
+
+                    var reactions = await msg.GetReactionsAsync(emoji);
+                    var whom = reactions.DistinctBy(_ => _.Id).Where(_ => _.IsBot == false).ToList();
+                    foreach (var item in whom)
+                        users.Add(item);
+
+                    if (users.Count >= 10)
+                        break;
+                }
+
                 if (users.Count() < 10)
                 {
                     await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"Not enough users reacted so no lobby will be created."));
                     return;
                 }
 
-                var reasons = new StringBuilder();
+                var reasons = new List<string>();
                 var players = new List<ulong>();
 
                 foreach (var user in users)
@@ -357,33 +376,42 @@ namespace HGV.Reaver.Commands
                     var link = await accountService.Get(ctx.Guild.Id, user.Id);
                     if (link is null)
                     {
-                        reasons.AppendLine($"{user.Mention} your account is not linked. Plese run the '/account link' command.");
+                        reasons.Add($"{user.Mention} your account is not linked. Plese run the '/account link' command.");
                         continue;
                     }
-                        
+
                     // Get Dota profile
                     var profile = await profileService.GetDotaProfile(link.SteamId);
                     if (profile is null)
                     {
-                        reasons.AppendLine($"{user.Mention} your account is linked but we can not find your profile.");
+                        reasons.Add($"{user.Mention} your account is linked but we can not find your profile.");
                         continue;
                     }
 
                     // Check rating
                     if (profile.Rating > limit)
                     {
-                        reasons.AppendLine($"{user.Mention} your rating of {(int)profile.Rating} is above the limit {limit}");
+                        reasons.Add($"{user.Mention} your rating of {(int)profile.Rating} is above the limit {limit}");
                         continue;
                     }
-                    
+
                     players.Add(link.SteamId);
                 }
 
-                reasons.Insert(0, $"Not enough players ({players.Count()}) meet the requirements so no lobby will be created. {Environment.NewLine}");
-
                 if (players.Count() < 10)
                 {
-                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent(reasons.ToString()));
+                    reasons.Add($"Not enough players ({players.Count()}) start a lobby.");
+                }
+
+                if (reasons.Count > 0)
+                {
+                    var warnings = new StringBuilder();
+                    warnings.AppendLine("The Bot can't start the lobby becasuse of the following errors:");
+
+                    foreach (var reason in reasons)
+                        warnings.AppendLine(reason);
+
+                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent(warnings.ToString()));
                     return;
                 }
 
