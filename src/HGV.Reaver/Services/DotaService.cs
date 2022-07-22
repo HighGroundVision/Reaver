@@ -11,6 +11,8 @@ namespace HGV.Reaver.Services
 
     public interface IDotaService
     {
+        public bool ExistingLobby { get; }
+
         CSODOTALobby GetActiveLobby();
         Task<SteamID> CreateSessionAsync(string username, string password, CancellationToken token = default(CancellationToken));
         void StopSession();
@@ -33,6 +35,8 @@ namespace HGV.Reaver.Services
         private readonly CallbackManager callbacks;
         private readonly CancellationTokenSource callbackCts;
         private readonly Task callbackWatcher;
+
+        public bool ExistingLobby => this.dota.Lobby != null;
 
         public DotaService()
         {

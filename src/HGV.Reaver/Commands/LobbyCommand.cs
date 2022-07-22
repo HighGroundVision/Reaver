@@ -314,6 +314,12 @@ namespace HGV.Reaver.Commands
         {
             try
             {
+                if (this.dota.ExistingLobby)
+                {
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"The Bot is hosting another lobby try again in the few minutes."));
+                    return;
+                }
+
                 var cap = (limit == long.MaxValue) ? "None" : limit.ToString();
                 var region = this.meta.GetRegion((int)regionId);
 
@@ -417,6 +423,8 @@ namespace HGV.Reaver.Commands
                 }
 
                 var heroes = roster.Select(_ => (uint)_.Id).ToList();
+
+                // TODO: Is there already an active session?
 
                 // Create Session.
                 var id = await this.dota.CreateSessionAsync(this.username, this.password);
